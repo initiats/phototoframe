@@ -10,6 +10,9 @@ from django.views.decorators.csrf import csrf_protect
 # If your import looks like this:
 from .models import Order
 
+import json
+import uuid
+from django.db.models import Q  # Useful if you add search later
 
 def index(request):
     # 1. Fetch Banners
@@ -44,6 +47,7 @@ def category_detail(request, slug):
     })
 
 # Import your model at the top
+
 
 # 1. Make sure you import your model at the top
 
@@ -558,15 +562,23 @@ def customize_plaque(request):
     return render(request, 'customize.html', {
         'shape_data_json': json.dumps(shape_data)
     })
-
+from .models import Category # Make sure to import your model
 
 def about(request):
-    return render(request, 'about.html')
+    # Fetch categories so the header dropdown has items
+    categories = Category.objects.all()
+    return render(request, 'about.html', {'categories': categories})
 
+
+from .models import Category  # Ensure this is at the top of your file
 
 
 def contact(request):
-    return render(request, 'contact.html')
+    # Fetch all categories so the header dropdown works
+    categories = Category.objects.all()
+
+    # If you have a contact form, you would handle it here
+    return render(request, 'contact.html', {'categories': categories})
 
 def categories_view(request):
     return render(request, 'categories.html')
@@ -944,8 +956,7 @@ def customization_edit(request, pk):
 
 
 import json
-from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+
 from .models import Product
 
 from .models import Collection, Product  # Ensure Collection is imported
@@ -955,122 +966,93 @@ import uuid  # Add this import at the top
 
 import json
 import uuid
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
+
 from .models import Product, Category, Order
 
 # --- 1. ADD TO CART (Configurator Logic) ---
 import uuid
 import json
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+
 from .models import Product
 
 import uuid
 import json
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt  # Optional: only if you have CSRF issues
+ # Optional: only if you have CSRF issues
 
 import uuid
 import json
-from django.http import JsonResponse
-from django.shortcuts import render
 
 
 def add_to_cart(request):
     if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            product_id = data.get('product_id')
+        cart = request.session.get('cart', {})
+        if not isinstance(cart, dict):
+            cart = {}
 
-            # Fetch the actual product name since JS doesn't send it
-            product = get_object_or_404(Product, id=product_id)
+        # --- Case A: Request comes from the Configurator (JSON) ---
+        if request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body)
+                product_id = data.get('product_id')
+                product = get_object_or_404(Product, id=product_id)
 
-            cart = request.session.get('cart', {})
-            if not isinstance(cart, dict):
-                cart = {}
+                cart_key = f"custom_{product_id}_{uuid.uuid4().hex[:6]}"
+                cart[cart_key] = {
+                    'cart_key': cart_key,
+                    'product_id': product_id,
+                    'product_name': product.title,
+                    'price': float(data.get('price', 0)),
+                    'custom_image': data.get('custom_image_base64'),
+                    'quantity': 1,
+                    'shape': data.get('shape', 'Standard'),
+                    'dimension': data.get('dimension', 'Standard'),
+                    'text': data.get('text', 'None'),
+                }
+                request.session['cart'] = cart
+                request.session.modified = True
+                return JsonResponse({'status': 'success'})
+            except Exception as e:
+                return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
-            # Create a unique key for this specific design
-            cart_key = f"{product_id}_{uuid.uuid4().hex[:6]}"
+        # --- Case B: Request comes from Collections Page (Standard Form POST) ---
+        else:
+            product_id = request.POST.get('product_id')
+            # Check if it's a Collection item or a Product item
+            # We try to get it from Collection model first
+            try:
+                item = Collection.objects.get(id=product_id)
+                name = item.title
+                price = float(item.price)
+                image = item.cover_image.url if item.cover_image else ""
+            except Collection.DoesNotExist:
+                item = get_object_or_404(Product, id=product_id)
+                name = item.title
+                price = float(item.price)
+                image = item.cover_image.url if item.cover_image else ""
 
-            # Match these keys EXACTLY with what your cart.html template uses
-            cart[cart_key] = {
-                'cart_key': cart_key,
-                'product_id': product_id,
-                'product_name': product.title,  # Get from DB
-                'price': float(data.get('price', 0)),
-                'custom_image': data.get('custom_image_base64'),  # Match JS key
-                'quantity': 1,
-                'shape': data.get('shape', 'Standard'),
-                'dimension': data.get('dimension', 'Standard'),
-                'text': data.get('text', 'None'),
-            }
+            # Standard items use the product_id as key so they don't duplicate unnecessarily
+            cart_key = f"std_{product_id}"
+
+            if cart_key in cart:
+                cart[cart_key]['quantity'] += 1
+            else:
+                cart[cart_key] = {
+                    'cart_key': cart_key,
+                    'product_id': product_id,
+                    'product_name': name,
+                    'price': price,
+                    'custom_image': image,
+                    'quantity': 1,
+                    'shape': 'Standard',
+                    'dimension': 'Standard',
+                    'text': 'None',
+                }
 
             request.session['cart'] = cart
             request.session.modified = True
-
-            return JsonResponse({'status': 'success'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            return redirect('cart_page')  # Redirect to cart page after clicking Buy Now
 
     return JsonResponse({'status': 'error', 'message': 'Invalid Request'}, status=405)
-# def add_to_cart(request):
-#     if request.method == 'POST':
-#         # 1. Get IDs and Source
-#         if request.content_type == 'application/json':
-#             data = json.loads(request.body)
-#             product_id = str(data.get('product_id'))
-#             source = data.get('source')
-#         else:
-#             data = request.POST
-#             product_id = str(data.get('product_id'))
-#             source = data.get('source')
-#
-#         # 2. Initialize Cart as a DICTIONARY
-#         cart = request.session.get('cart', {})
-#         if not isinstance(cart, dict):
-#             cart = {}
-#
-#         # 3. Fetch details based on source (Collection vs Product)
-#         if source == 'collection':
-#             item = get_object_or_404(Collection, id=product_id)
-#             name = item.title
-#             price = float(item.price)
-#             image = item.cover_image.url
-#         else:
-#             item = get_object_or_404(Product, id=product_id)
-#             name = item.title
-#             # Use custom price if available, otherwise base product price
-#             price = float(data.get('price', item.price or 0))
-#             image = data.get('custom_image_base64', "")
-#
-#         # 4. Update quantity if exists, else create new entry
-#         if product_id in cart:
-#             cart[product_id]['quantity'] += 1
-#         else:
-#             cart[product_id] = {
-#                 'product_id': product_id,
-#                 'product_name': name,
-#                 'price': price,
-#                 'custom_image': image,
-#                 'quantity': 1,
-#                 'shape': data.get('shape', 'Standard'),
-#                 'dimension': data.get('dimension', 'Standard'),
-#                 'text': data.get('text', 'None'),
-#             }
-#
-#         request.session['cart'] = cart
-#         request.session.modified = True
-#
-#         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-#             return JsonResponse({'status': 'success', 'redirect_url': '/cart/'})
-#
-#         return redirect('cart_page')
-#
-#     return redirect('index')
-
-# import json
-# from django.http import JsonResponse
 
 def update_cart_quantity(request):
     """Updates quantity of a specific item in the cart via AJAX"""
@@ -1103,10 +1085,18 @@ def remove_from_cart(request, cart_key):
         request.session.modified = True
     return redirect('cart_page')
 
+
 def categories_view(request):
-    # Prefetch products to avoid multiple database hits (N+1 problem)
+    # Fetch all categories to display on the page
     categories = Category.objects.prefetch_related('product_set').all()
-    return render(request, 'categories.html', {'categories': categories})
+
+    # Get the specific category ID from the URL if it exists (e.g., ?id=10)
+    target_category_id = request.GET.get('id')
+
+    return render(request, 'categories.html', {
+        'categories': categories,
+        'target_id': target_category_id  # Pass this to the template
+    })
 
 
 def checkout(request):
@@ -1147,9 +1137,8 @@ def my_account_view(request):
     
     return render(request, 'my_account.html', {'email': email})
 
-from django.shortcuts import render
 from .models import Category, Collection
-from django.db.models import Q
+
 
 def collections_view(request):
     categories = Category.objects.all()
@@ -1177,12 +1166,6 @@ def category_products(path, category_id):
     products = Product.objects.filter(category=category)
     return render(path, 'category_products.html', {'category': category, 'products': products})
 
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Collection
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.shortcuts import render, redirect, get_object_or_404
-from django.shortcuts import render, redirect, get_object_or_404
 from .models import Collection
 
 # --- ADMIN VIEW: List All Collections ---
@@ -1264,7 +1247,7 @@ def cart_page(request):
         'total_price': total_price,
         'categories': categories
     })
-from django.shortcuts import render, redirect, get_object_or_404
+
 from .models import Accessory
 
 
@@ -1310,7 +1293,7 @@ def accessory_delete(request, pk):
     accessory.delete()
     return redirect('accessory_list')
 
-from django.shortcuts import render
+
 from .models import Accessory
 
 

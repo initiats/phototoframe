@@ -1,3 +1,16 @@
-*.db 
-*.sqlite3 
-.env 
+# Database
+*.db
+*.sqlite3
+
+# Environment variables
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# IDE files
+.idea/
+
+# OS files
+.DS_Store

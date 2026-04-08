@@ -179,35 +179,34 @@
         .trust-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 1300px; margin: auto; text-align: center; }
         .trust-item h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px; }
 
-        /* --- FOOTER --- */
-        footer { background: #fff; padding: 80px 5% 40px; color: var(--dark); border-top: 1px solid var(--border); }
-        .footer-social-strip { display: flex; justify-content: space-between; align-items: center; padding-bottom: 60px; flex-wrap: wrap; gap: 20px; }
-        .footer-social-strip a { color: #999; font-size: 20px; transition: 0.3s; text-decoration: none; }
-        .footer-social-strip a:hover { color: var(--abstrak-purple); }
-        .footer-main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr 0.8fr 0.8fr; gap: 40px; max-width: 1400px; margin: auto; }
-        .footer-cta h2 { font-size: 48px; font-weight: 800; margin: 0 0 20px 0; letter-spacing: -1px; }
-        .footer-cta p { color: #777; font-size: 15px; line-height: 1.6; margin-bottom: 30px; max-width: 400px; }
-        .footer-links-col h4 { font-size: 18px; font-weight: 700; margin: 0 0 25px 0; color: var(--dark); }
-        .footer-links-col ul { list-style: none; padding: 0; margin: 0; }
-        .footer-links-col ul li { margin-bottom: 12px; }
-        .footer-links-col ul li a { text-decoration: none; color: #777; font-size: 15px; transition: 0.3s; }
-        .footer-links-col ul li a:hover { color: var(--abstrak-purple); padding-left: 5px; }
-        .footer-bottom-line { margin-top: 80px; padding-top: 30px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #999; }
+        /* --- FOOTER MAIN --- */
+        footer { background: #fff; padding: 80px 5% 40px; border-top: 1px solid var(--border); }
+        .footer-social-strip { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto 60px; padding-bottom: 30px; border-bottom: 1px solid var(--border); }
+        .footer-social-strip .social-box { display: flex; justify-content: center; flex: 1; }
+        .footer-social-strip a { color: #999; font-size: 22px; transition: 0.3s ease; }
+        .footer-social-strip a:hover { color: var(--abstrak-purple); transform: translateY(-5px); }
+
+        .footer-main-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 50px; max-width: 1400px; margin: 0 auto 60px; }
+        .footer-cta p { color: #777; font-size: 15px; line-height: 1.7; max-width: 350px; }
+        .footer-links-col h4 { font-size: 16px; font-weight: 700; margin-bottom: 25px; color: var(--dark); text-transform: uppercase; letter-spacing: 1px; }
+        .footer-links-col ul { list-style: none; padding: 0; }
+        .footer-links-col ul li { margin-bottom: 15px; }
+        .footer-links-col a { text-decoration: none; color: #999; font-size: 15px; transition: 0.3s; }
+        .footer-links-col a:hover { color: var(--abstrak-purple); padding-left: 5px; }
+
+        .footer-bottom-line { display: flex; justify-content: space-between; align-items: center; padding-top: 30px; border-top: 1px solid var(--border); max-width: 1400px; margin: 0 auto; }
+        .copyright { color: #999; font-size: 14px; }
+        .footer-legal-links { display: flex; gap: 25px; }
+        .footer-legal-links a { text-decoration: none; color: #999; font-size: 13px; transition: 0.3s; }
+        .footer-legal-links a:hover { color: var(--abstrak-purple); }
         .back-to-top { width: 45px; height: 45px; background: var(--abstrak-purple); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; text-decoration: none; transition: 0.3s; }
 
-        /* --- MOBILE OPTIMIZATIONS --- */
+        /* Responsive Adjustments */
         @media (max-width: 992px) {
             .mobile-toggle { display: block; }
             nav {
-                position: fixed;
-                top: 0;
-                right: -100%;
-                width: 280px;
-                height: 100vh;
-                background: #fff;
-                z-index: 2000;
-                padding: 80px 30px;
-                box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+                position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #fff; z-index: 2000;
+                padding: 80px 30px; box-shadow: -10px 0 30px rgba(0,0,0,0.1);
                 transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             }
             nav.active { right: 0; }
@@ -216,9 +215,6 @@
             .dropdown { position: static; opacity: 1; visibility: visible; transform: none; box-shadow: none; display: none; padding-left: 15px; }
             nav ul li:hover .dropdown { display: block; }
             .hero-viewport { border-radius: 30px; height: 60vh; min-height: 450px; }
-            .hero-content { padding: 0 5%; text-align: center; }
-            .hero-content h1 { font-size: 32px; }
-            .hero-btn { padding: 15px 30px; }
             .steps-grid { grid-template-columns: 1fr; gap: 30px; }
             .product-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
             .footer-main-grid { grid-template-columns: 1fr 1fr; }
@@ -228,30 +224,31 @@
     </style>
 </head>
 <body>
-
 <header>
     <div class="nav-container">
         <a href="{% url 'index' %}"><img src="{% static 'images/photo2glass.jpg' %}" class="brand-logo" alt="Logo"></a>
-
         <nav id="sidebarNav">
             <ul>
                 <li><a href="{% url 'index' %}">Home</a></li>
-                <li>
-                    <a href="javascript:void(0);">Personalization <i class="fa-solid fa-chevron-down" style="font-size: 9px; margin-left: 5px;"></i></a>
+                <li class="has-dropdown">
+                    <a href="{% url 'categories' %}" class="dropdown-trigger">Personalization <i class="fa-solid fa-chevron-down" style="font-size: 9px; margin-left: 5px;"></i></a>
                     <div class="dropdown">
-                        {% for category in categories %}
-                        <a href="#category-{{ category.id }}">{{ category.name }}</a>
+                        {# Backend Added Categories Logic Starts Here #}
+                        {% for cat in categories %}
+                        <a href="{% url 'categories' %}?id={{ cat.id }}">{{ cat.name }}</a>
                         {% endfor %}
+                        {# Backend Added Categories Logic Ends Here #}
                     </div>
                 </li>
                 <li>
                     <a href="{% url 'collections' %}">Collections <i class="fa-solid fa-chevron-down" style="font-size: 9px; margin-left: 5px;"></i></a>
                     <div class="dropdown">
-                         <a href="{% url 'collections' %}">All Collections</a>
+
+                        <a href="{% url 'collections' %}">All Collections</a>
                         <a href="{% url 'collections' %}?style=landscape">Landscape</a>
-                        <a href="#">Modern & Abstract Arts</a>
-                        <a href="#">Natural and wildlife</a>
-                        <a href="#">Religious and spiritual</a>
+                        <a href="{% url 'collections' %}?style=modern">Modern & Abstract Arts</a>
+                        <a href="{% url 'collections' %}?style=wildlife">Natural and wildlife</a>
+                        <a href="{% url 'collections' %}?style=religious">Religious and spiritual</a>
                     </div>
                 </li>
                 <li><a href="{% url 'accessories' %}">Accessories</a></li>
@@ -259,7 +256,6 @@
                 <li><a href="/contact">Contact</a></li>
             </ul>
         </nav>
-
         <div class="user-actions">
             <a href="{% url 'my_account' %}" class="action-icon"><i class="fa-regular fa-user"></i></a>
             <a href="/cart/" class="action-icon"><i class="fa-solid fa-cart-shopping"></i></a>
@@ -267,7 +263,6 @@
         </div>
     </div>
 </header>
-
 <main>
     <section class="hero-section">
         <div class="hero-viewport" id="sliderContainer">
@@ -315,7 +310,7 @@
     <section class="category-group" id="category-{{ category.id }}">
         <div class="category-header">
             <h3>{{ category.name }}</h3>
-            <a href="/categories" class="view-all">View All Collections</a>
+            <a href="{% url 'categories' %}?id={{ category.id }}" class="view-all">View All {{ category.name }}</a>
         </div>
         <div class="product-grid">
             {% for product in category.product_set.all|slice:":4" %}
@@ -346,14 +341,22 @@
 
 <footer>
     <div class="footer-social-strip">
-        <a href="#"><i class="fab fa-facebook-f"></i></a>
-        <a href="#"><i class="fab fa-twitter"></i></a>
-        <a href="#"><i class="fab fa-instagram"></i></a>
+        <div class="social-box"><a href="#"><i class="fab fa-facebook-f"></i></a></div>
+
+        <div class="social-box"><a href="#"><i class="fab fa-pinterest-p"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-linkedin-in"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-instagram"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-vimeo-v"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-dribbble"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-behance"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-snapchat-ghost"></i></a></div>
     </div>
 
     <div class="footer-main-grid">
         <div class="footer-cta">
-            <h2>Get in touch!</h2>
+            <a href="{% url 'index' %}">
+                <img src="{% static 'images/photo2glass.jpg' %}" class="brand-logo" alt="Logo" style="margin-bottom: 20px;">
+            </a>
             <p>Subscribe to our newsletter and stay updated with our latest glass plaque collections.</p>
         </div>
         <div class="footer-links-col">
@@ -365,28 +368,35 @@
             </ul>
         </div>
         <div class="footer-links-col">
-            <h4>Categories</h4>
+            <h4>Explore</h4>
             <ul>
-                <li><a href="/categories">All Categories</a></li>
+                <li><a href="/categories">Personalization</a></li>
+                <li><a href="/collections">Collections</a></li>
+                <li><a href="/accessories">Accessories</a></li>
             </ul>
         </div>
         <div class="footer-links-col">
             <h4>Support</h4>
-            <ul>
-                <li><a href="/privacy">Privacy Policy</a></li>
-                <li><a href="/terms">Terms and conditions </a></li>
+            <ul class="footer-contact-info">
+                <li style="margin-bottom: 12px;"><a href="tel:+919765435678" style="color: #999; text-decoration: none;"><i class="fas fa-phone-alt" style="color: var(--abstrak-purple); margin-right: 8px;"></i> +91 97654 35678</a></li>
+                <li><a href="mailto:photoframe@gmail.com" style="color: #999; text-decoration: none;"><i class="fas fa-envelope" style="color: var(--abstrak-purple); margin-right: 8px;"></i> photoframe@gmail.com</a></li>
             </ul>
         </div>
     </div>
 
     <div class="footer-bottom-line">
-        <div>&copy; Copyright photo2glass. All rights reserved.</div>
+        <div class="copyright">&copy; Copyright photo2glass. All rights reserved.</div>
+        <div class="footer-legal-links">
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms & Conditions</a>
+            <a href="/refund">Refund Policy</a>
+            <a href="/faqs">FAQs</a>
+        </div>
         <a href="#" class="back-to-top"><i class="fas fa-chevron-up"></i></a>
     </div>
 </footer>
 
 <script>
-    // --- SIDEBAR TOGGLE ---
     const menuBtn = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebarNav');
 
@@ -407,7 +417,6 @@
         }
     });
 
-    // --- SLIDER ---
     document.addEventListener("DOMContentLoaded", function() {
         const slides = document.querySelectorAll('.hero-slide');
         let current = 0;
@@ -420,6 +429,5 @@
         }
     });
 </script>
-
 </body>
 </html>

@@ -313,7 +313,7 @@
                         <td class="fw-semibold">{{ p.title }}</td>
                         <td>
                             <span class="price-badge">
-                                ₹{% if p.price and p.price != 'None' %}{{ p.price }}{% else %}0.00{% endif %}
+                                Rs {% if p.price and p.price != 'None' %}{{ p.price }}{% else %}0.00{% endif %}
                             </span>
                         </td>
                         <td class="text-muted">{{ p.description|truncatechars:50 }}</td>
