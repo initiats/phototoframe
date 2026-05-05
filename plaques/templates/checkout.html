@@ -1,0 +1,378 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Secure Checkout | Photoglass Luxury</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favglass.png' %}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --dark: #0a0a0a;
+            --gold: #b38e44;
+            --border: #eeeeee;
+            --transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            --round-radius: 20px;
+            --abstrak-purple: #5956e1;
+            --bg-light: #f9f9f9;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background: #fff; color: var(--dark); -webkit-font-smoothing: antialiased; }
+
+        /* --- NAVIGATION --- */
+        header { background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 5%; max-width: 1600px; margin: auto; }
+        .brand-logo { height: 38px; width: auto; }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--dark);
+            order: 3;
+        }
+
+        nav ul { display: flex; list-style: none; gap: 30px; margin: 0; padding: 0; }
+        nav ul li { position: relative; }
+        nav a { text-decoration: none; color: var(--dark); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 20px 0; display: inline-block; transition: 0.3s; }
+        nav a:hover { color: var(--abstrak-purple); }
+
+        .dropdown {
+            position: absolute; top: 100%; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #ffffff; min-width: 220px; box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+            border-radius: 15px; padding: 15px 0; opacity: 0; visibility: hidden; transition: all 0.4s ease; z-index: 1100;
+        }
+        nav ul li:hover .dropdown { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        .dropdown a { display: block; padding: 12px 25px; color: #666; text-transform: none; font-size: 14px; font-weight: 500; transition: 0.3s; }
+
+        .checkout-steps { display: flex; gap: 15px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: #ccc; }
+        .checkout-steps span.active { color: var(--dark); }
+        .checkout-steps i { font-size: 8px; align-self: center; }
+
+        .user-actions { display: flex; gap: 15px; align-items: center; }
+        .action-icon { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #f8f8f8; color: var(--dark); text-decoration: none; transition: 0.3s; font-size: 18px; }
+
+        /* --- CHECKOUT LAYOUT --- */
+        .checkout-wrapper { display: flex; max-width: 1400px; margin: 0 auto; min-height: 80vh; }
+        .checkout-main { flex: 1.4; padding: 60px 5%; border-right: 1px solid var(--border); }
+        .form-section { margin-bottom: 40px; }
+        .form-section h3 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; margin-bottom: 8px; letter-spacing: 0.5px; }
+        input, select { width: 100%; padding: 15px; border: 1px solid #e2e8f0; border-radius: 12px; font-family: inherit; font-size: 14px; transition: 0.3s; background: var(--bg-light); }
+        input:focus { border-color: var(--abstrak-purple); outline: none; background: #fff; box-shadow: 0 0 0 4px rgba(89, 86, 225, 0.05); }
+
+        .pay-btn { background: var(--dark); color: #fff; width: 100%; padding: 22px; border-radius: 15px; font-weight: 700; font-size: 14px; border: none; cursor: pointer; text-transform: uppercase; transition: 0.3s; margin-top: 20px; text-decoration: none; display: block; text-align: center; }
+        .pay-btn:hover { background: var(--abstrak-purple); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(89, 86, 225, 0.2); }
+
+        /* Right Side: Order Summary */
+        .checkout-sidebar { flex: 1; background: var(--bg-light); padding: 60px 5%; }
+        .summary-card { position: sticky; top: 120px; }
+        .summary-item { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+        .item-thumb { width: 70px; height: 70px; background: #fff; border-radius: 10px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        .item-thumb img { max-width: 90%; max-height: 90%; object-fit: contain; }
+        .item-qty-badge { position: absolute; top: -8px; right: -8px; background: #666; color: #fff; width: 20px; height: 20px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+
+        .item-info p { margin: 0; font-size: 14px; font-weight: 600; }
+        .item-info span { font-size: 12px; color: #888; display: block; margin-top: 4px; }
+        .item-price { margin-left: auto; font-weight: 700; font-size: 15px; }
+
+        .totals-box { margin-top: 30px; }
+        .total-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #666; }
+        .total-row.grand-total { border-top: 1px solid #ddd; padding-top: 20px; margin-top: 20px; color: var(--dark); font-size: 22px; font-weight: 800; font-family: 'Playfair Display', serif; }
+
+        /* --- FOOTER MAIN --- */
+        footer { background: #fff; padding: 80px 5% 40px; border-top: 1px solid var(--border); }
+        .footer-social-strip { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto 60px; padding-bottom: 30px; border-bottom: 1px solid var(--border); }
+        .footer-social-strip .social-box { display: flex; justify-content: center; flex: 1; }
+        .footer-social-strip a { color: #999; font-size: 22px; transition: 0.3s ease; text-decoration: none; }
+        .footer-social-strip a:hover { color: var(--abstrak-purple); transform: translateY(-5px); }
+
+        .footer-main-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 50px; max-width: 1400px; margin: 0 auto 60px; }
+        .footer-cta p { color: #777; font-size: 15px; line-height: 1.7; max-width: 350px; }
+        .footer-links-col h4 { font-size: 16px; font-weight: 700; margin-bottom: 25px; color: var(--dark); text-transform: uppercase; letter-spacing: 1px; }
+        .footer-links-col ul { list-style: none; padding: 0; }
+        .footer-links-col ul li { margin-bottom: 15px; }
+        .footer-links-col a { text-decoration: none; color: #999; font-size: 15px; transition: 0.3s; }
+        .footer-links-col a:hover { color: var(--abstrak-purple); padding-left: 5px; }
+
+        .footer-bottom-line { display: flex; justify-content: space-between; align-items: center; padding-top: 30px; border-top: 1px solid var(--border); max-width: 1400px; margin: 0 auto; }
+        .copyright { color: #999; font-size: 14px; }
+        .footer-legal-links { display: flex; gap: 25px; }
+        .footer-legal-links a { text-decoration: none; color: #999; font-size: 13px; transition: 0.3s; }
+        .footer-legal-links a:hover { color: var(--abstrak-purple); }
+        .back-to-top { width: 45px; height: 45px; background: var(--abstrak-purple); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; text-decoration: none; transition: 0.3s; }
+
+        @media (max-width: 1024px) {
+            .mobile-toggle { display: block; }
+            nav {
+                position: fixed; top: 0; right: -100%; width: 280px; height: 100vh;
+                background: #fff; z-index: 2000; padding: 80px 30px;
+                box-shadow: -10px 0 30px rgba(0,0,0,0.1); transition: 0.4s ease;
+            }
+            nav.active { right: 0; }
+            nav ul { flex-direction: column; gap: 15px; }
+            nav a { font-size: 16px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; width: 100%; }
+            .dropdown { position: static; opacity: 1; visibility: visible; transform: none; box-shadow: none; display: none; padding-left: 15px; }
+            nav ul li:hover .dropdown { display: block; }
+
+            .checkout-wrapper { flex-direction: column-reverse; }
+            .checkout-main, .checkout-sidebar { flex: none; width: 100%; padding: 40px 5%; border: none; }
+            .checkout-sidebar { background: #fff; border-bottom: 1px solid var(--border); }
+
+            /* Footer Mobile */
+            footer { padding: 40px 5% 20px; text-align: center; }
+            .footer-social-strip { flex-wrap: wrap; gap: 15px; margin-bottom: 30px; }
+            .footer-social-strip .social-box { flex: 0 0 20%; }
+            .footer-main-grid { grid-template-columns: 1fr; gap: 30px; margin-bottom: 40px; }
+            .footer-cta { grid-column: span 1; }
+            .footer-cta p { margin: 0 auto; }
+            .footer-links-col h4 { margin-bottom: 15px; font-size: 14px; }
+            .footer-links-col ul li { margin-bottom: 10px; }
+            .footer-bottom-line { flex-direction: column; gap: 20px; }
+            .footer-legal-links { flex-wrap: wrap; justify-content: center; gap: 10px 20px; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="nav-container">
+        <a href="{% url 'index' %}"><img src="{% static 'images/photo2glass.jpg' %}" class="brand-logo" alt="Logo"></a>
+        <nav id="sidebarNav">
+            <ul>
+                <li><a href="{% url 'index' %}">Home</a></li>
+                <li class="has-dropdown">
+                    <a href="{% url 'categories' %}" class="dropdown-trigger">Personalization <i class="fa-solid fa-chevron-down" style="font-size: 9px; margin-left: 5px;"></i></a>
+                    <div class="dropdown">
+                        {% for cat in categories %}
+                        <a href="{% url 'categories' %}?id={{ cat.id }}">{{ cat.name }}</a>
+                        {% endfor %}
+                    </div>
+                </li>
+                <li>
+                    <a href="{% url 'collections' %}">Collections <i class="fa-solid fa-chevron-down" style="font-size: 9px; margin-left: 5px;"></i></a>
+                    <div class="dropdown">
+                        <a href="{% url 'collections' %}">All Collections</a>
+                        <a href="{% url 'collections' %}?style=landscape">Landscape</a>
+                        <a href="#">Modern & Abstract Arts</a>
+                        <a href="#">Natural and wildlife</a>
+                        <a href="#">Religious and spiritual</a>
+                    </div>
+                </li>
+                <li><a href="{% url 'accessories' %}">Accessories</a></li>
+                <li><a href="/about">About Us</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="user-actions">
+            <a href="{% url 'my_account' %}" class="action-icon"><i class="fa-regular fa-user"></i></a>
+            <a href="/cart/" class="action-icon"><i class="fa-solid fa-cart-shopping"></i></a>
+            <button class="mobile-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </div>
+</header>
+
+<div class="checkout-wrapper">
+    <main class="checkout-main">
+        <form method="POST" action="/account/">
+            {% csrf_token %}
+
+            <div class="form-section">
+                <div class="checkout-steps" style="margin-bottom: 30px;">
+                    <span class="active">Information</span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                    <span>Shipping</span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                    <span>Payment</span>
+                </div>
+
+                <h3>Contact Information</h3>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" placeholder="email@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" name="phone" placeholder="+91 00000 00000" required>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Shipping Details</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" name="last_name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Complete Address</label>
+                    <input type="text" name="address" placeholder="House No, Building, Street Name" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>City</label>
+                        <input type="text" name="city" required>
+                    </div>
+                    <div class="form-group">
+                        <label>State</label>
+                        <input type="text" name="state" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Postal Code</label>
+                        <input type="text" name="pin_code" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Country</label>
+                        <select name="country">
+                            <option value="Mauritius">Mauritius</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="pay-btn">Continue to Payment</button>
+        </form>
+    </main>
+
+    <aside class="checkout-sidebar">
+        <div class="summary-card">
+            <h3 style="font-family: 'Playfair Display', serif; margin-bottom: 30px;">Order Summary</h3>
+
+            {% for item in cart_items %}
+            <div class="summary-item">
+                <div class="item-thumb">
+                    {% if item.custom_image %}
+                        <img src="{{ item.custom_image }}" alt="Preview">
+                    {% else %}
+                        <img src="{% static 'images/placeholder.jpg' %}" alt="Preview">
+                    {% endif %}
+                    <div class="item-qty-badge">{{ item.quantity }}</div>
+                </div>
+                <div class="item-info">
+                    <p>{{ item.product_name|default:"Custom Glass Plaque" }}</p>
+                    <span>{{ item.dimension }} / {{ item.shape }}</span>
+                </div>
+                <div class="item-price">Rs.{{ item.price }}</div>
+            </div>
+            {% endfor %}
+
+            <div class="totals-box">
+                <div class="total-row">
+                    <span>Subtotal</span>
+                    <span>Rs.{{ total_price|default:"0.00" }}</span>
+                </div>
+                <div class="total-row">
+                    <span>Shipping</span>
+                    <span style="color: var(--gold); font-weight: 700;">Complimentary</span>
+                </div>
+                <div class="total-row grand-total">
+                    <span>Total</span>
+                    <span>Rs.{{ total_price|default:"0.00" }}</span>
+                </div>
+                <p style="font-size: 11px; color: #999; margin-top: 10px; text-align: center;">Secure payment via Razorpay / Stripe</p>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<footer>
+    <div class="footer-social-strip">
+        <div class="social-box"><a href="#"><i class="fab fa-facebook-f"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-pinterest-p"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-linkedin-in"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-instagram"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-vimeo-v"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-dribbble"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-behance"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-snapchat-ghost"></i></a></div>
+    </div>
+
+    <div class="footer-main-grid">
+        <div class="footer-cta">
+            <a href="{% url 'index' %}">
+                <img src="{% static 'images/photo2glass.jpg' %}" class="brand-logo" alt="Logo" style="margin-bottom: 20px;">
+            </a>
+            <p>Subscribe to our newsletter and stay updated with our latest glass plaque collections.</p>
+        </div>
+
+        <div class="footer-links-col">
+            <h4>Quick links</h4>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-links-col">
+            <h4>Explore</h4>
+            <ul>
+                <li><a href="/categories">Personalization</a></li>
+                <li><a href="/collections">Collections</a></li>
+                <li><a href="/accessories">Accessories</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-links-col">
+            <h4>Support</h4>
+            <ul class="footer-contact-info" style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 12px;"><a href="tel:+919765435678" style="color: #999; text-decoration: none;"><i class="fas fa-phone-alt" style="color: var(--abstrak-purple); margin-right: 8px;"></i> +91 97654 35678</a></li>
+                <li><a href="mailto:photoframe@gmail.com" style="color: #999; text-decoration: none;"><i class="fas fa-envelope" style="color: var(--abstrak-purple); margin-right: 8px;"></i> photoframe@gmail.com</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom-line">
+        <div class="copyright">&copy; Copyright photo2glass. All rights reserved.</div>
+        <div class="footer-legal-links">
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms & Conditions</a>
+            <a href="/refund">Refund Policy</a>
+            <a href="/faqs">FAQs</a>
+        </div>
+        <a href="#" class="back-to-top"><i class="fas fa-chevron-up"></i></a>
+    </div>
+</footer>
+
+<script>
+    const menuBtn = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebarNav');
+
+    if (menuBtn) {
+        menuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            const icon = menuBtn.querySelector('i');
+            if (sidebar.classList.contains('active')) {
+                icon.classList.replace('fa-bars', 'fa-xmark');
+            } else {
+                icon.classList.replace('fa-xmark', 'fa-bars');
+            }
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (sidebar && !sidebar.contains(e.target) && menuBtn && !menuBtn.contains(e.target)) {
+            sidebar.classList.remove('active');
+            const icon = menuBtn.querySelector('i');
+            if (icon) icon.classList.replace('fa-xmark', 'fa-bars');
+        }
+    });
+</script>
+</body>
+</html>
