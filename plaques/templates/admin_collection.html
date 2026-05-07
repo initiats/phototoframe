@@ -1,0 +1,403 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Collections Management | Photoglass Admin</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favglass.png' %}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --primary: #1d3557;
+            --secondary: #457b9d;
+            --primary-bg: #f1f5f9;
+            --bg-body: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background: var(--bg-body);
+            display: flex;
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #fff;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid #eef2f6;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            z-index: 2000;
+            transition: var(--transition);
+        }
+
+        .sidebar-header { padding: 30px 25px; text-align: center; }
+        .sidebar-header img { max-width: 150px; }
+
+        .nav-menu { flex: 1; padding: 0 15px; }
+        .menu-label {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 1.5px;
+            padding: 25px 15px 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 18px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 10px;
+            margin-bottom: 4px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-item i { margin-right: 12px; width: 20px; text-align: center; }
+        .nav-item.active { background: var(--primary); color: #fff; }
+        .nav-item:hover { background: var(--primary-bg); color: var(--primary); }
+        .logout-section { padding: 20px; border-top: 1px solid #f1f5f9; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 40px 50px;
+            transition: var(--transition);
+        }
+
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header-flex h1 { font-size: 26px; font-weight: 700; margin: 0; }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        /* --- TABLE & CARDS --- */
+        .data-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            padding: 30px;
+        }
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th { text-align: left; padding: 15px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid #f1f5f9; letter-spacing: 0.5px; }
+        td { padding: 15px; font-size: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+        .preview-img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; border: 1px solid #eee; }
+        .price-badge { background: #f0fdf4; color: #16a34a; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 13px; }
+
+        .action-btn { color: #64748b; text-decoration: none; margin-left: 10px; transition: 0.3s; cursor: pointer; font-size: 16px; }
+        .action-btn:hover { color: var(--primary); }
+
+        /* --- MODAL --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .modal-content h3 { margin-top: 0; font-size: 20px; font-weight: 700; margin-bottom: 25px; }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 12px; border: 1px solid #eef2f6; border-radius: 10px;
+            font-family: inherit; font-size: 14px;
+            background: white;
+        }
+
+        /* Category List in Modal */
+        .cat-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        .cat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f9f9f9;
+        }
+        .cat-item span { font-size: 14px; font-weight: 500; }
+        .cat-item .del-btn { color: #ef4444; cursor: pointer; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <img src="{% static 'images/photo2glass.jpg' %}" alt="Logo">
+    </div>
+
+    <nav class="nav-menu">
+        <p class="menu-label">Main System</p>
+        <a href="{% url 'dashboard' %}" class="nav-item ">
+            <i class="fa-solid fa-chart-pie"></i> Dashboard
+        </a>
+
+        <p class="menu-label">Catalogue Management</p>
+        <a href="{% url 'banner_list' %}" class="nav-item">
+            <i class="fa-solid fa-image"></i> Banner
+        </a>
+        <a href="{% url 'category_list' %}" class="nav-item">
+            <i class="fa-solid fa-tags"></i> Categories
+        </a>
+        <a href="{% url 'collection_list' %}" class="nav-item active">
+            <i class="fa-solid fa-layer-group"></i> Collections
+        </a>
+        <a href="{% url 'accessory_list' %}" class="nav-item">
+            <i class="fa-solid fa-gem"></i> Accessories
+        </a>
+        <a href="{% url 'shape_list' %}" class="nav-item">
+            <i class="fa-solid fa-shapes"></i> Add Format
+        </a>
+        <a href="{% url 'material_list' %}" class="nav-item">
+            <i class="fa-solid fa-cubes"></i> Materials
+        </a>
+        <a href="{% url 'thickness_list' %}" class="nav-item">
+            <i class="fa-solid fa-bars-staggered"></i> Thickness
+        </a>
+        <a href="{% url 'dimension_list' %}" class="nav-item">
+            <i class="fa-solid fa-ruler-combined"></i> Dimensions
+        </a>
+        <a href="{% url 'fastening_list' %}" class="nav-item">
+            <i class="fa-solid fa-screwdriver-wrench"></i> Stand
+        </a>
+        <a href="{% url 'product_list' %}" class="nav-item">
+            <i class="fa-solid fa-box"></i> Product
+        </a>
+
+        <p class="menu-label">Sales</p>
+        <a href="{% url 'order_list' %}" class="nav-item">
+            <i class="fa-solid fa-truck-fast"></i> Orders
+        </a>
+    </nav>
+
+    <div class="logout-section">
+        <a href="{% url 'logout' %}" class="nav-item" style="color:#ef4444;">
+            <i class="fa-solid fa-power-off"></i> Logout
+        </a>
+    </div>
+</aside>
+<main class="main-content">
+    <div class="header-flex">
+        <h1>Collections</h1>
+        <div class="button-group">
+            <button class="btn-secondary" onclick="openCatModal()">
+                <i class="fa-solid fa-tags"></i> MANAGE CATEGORIES
+            </button>
+            <button class="btn-primary" onclick="openModal()">
+                <i class="fa-solid fa-plus"></i> NEW COLLECTION
+            </button>
+        </div>
+    </div>
+
+    <div class="data-card">
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Preview</th>
+                        <th>Category</th>
+                        <th>Title</th>
+                        <th>Price</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for col in collections %}
+                    <tr>
+                        <td>{% if col.cover_image %}<img src="{{ col.cover_image.url }}" class="preview-img">{% endif %}</td>
+                        <td><span class="badge" style="background:#eef2ff; color:#4338ca; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:600;">{{ col.title }}</span></td>
+                        <td><strong>{{ col.description|truncatechars:40 }}</strong></td>
+                        <td><span class="price-badge">Rs.{{ col.price }}</span></td>
+                        <td style="text-align: right;">
+                            <a href="#" class="action-btn"><i class="fa-solid fa-pen-to-square"></i></a>
+                            <a href="#" class="action-btn" style="color:#ef4444;"><i class="fa-solid fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div id="catModal" class="modal">
+    <div class="modal-content">
+        <h3>Manage Collection Categories</h3>
+
+        <form id="addCatForm" onsubmit="addCategory(event)">
+            <div class="form-group">
+                <label>NEW CATEGORY NAME</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="newCatInput" required placeholder="e.g. Wildlife">
+                    <button type="submit" class="btn-primary" style="padding: 0 20px;">ADD</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="cat-list" id="catListContainer">
+            </div>
+
+        <button type="button" onclick="closeCatModal()" style="width:100%; margin-top:20px; background:none; border:none; color:var(--text-muted); cursor:pointer; font-weight:600;">Close</button>
+    </div>
+</div>
+
+<div id="colModal" class="modal">
+    <div class="modal-content">
+        <h3>Add New Collection</h3>
+        <form action="{% url 'collection_add' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>CATEGORY</label>
+                <select name="title" id="dynamicCatSelect" required>
+                    <option value="" disabled selected>Select Category</option>
+                    </select>
+            </div>
+            <div class="form-group"><label>TITLE</label><input type="text" name="description" required placeholder="Enter title"></div>
+            <div class="form-group"><label>PRICE (Rs.)</label><input type="number" step="0.01" name="price" required placeholder="0.00"></div>
+            <div class="form-group"><label>COVER IMAGE</label><input type="file" name="cover_image" required></div>
+            <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">SAVE COLLECTION</button>
+            <button type="button" onclick="closeModal()" style="width:100%; margin-top:12px; background:none; border:none; color:var(--text-muted); cursor:pointer; font-weight:600;">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Initial categories (Usually you would load these from your Django context)
+    let categories = ["Landscape", "Modern & Abstract Arts", "Natural and wildlife", "Religious and spiritual"];
+
+    function renderCategories() {
+        const listContainer = document.getElementById('catListContainer');
+        const selectDropdown = document.getElementById('dynamicCatSelect');
+
+        // Render the list in Management Modal
+        listContainer.innerHTML = categories.map((cat, index) => `
+            <div class="cat-item">
+                <span>${cat}</span>
+                <i class="fa-solid fa-trash del-btn" onclick="deleteCategory(${index})"></i>
+            </div>
+        `).join('');
+
+        // Render the dropdown in the Add Collection Modal
+        selectDropdown.innerHTML = '<option value="" disabled selected>Select Category</option>' +
+            categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+    }
+
+    function addCategory(e) {
+        e.preventDefault();
+        const input = document.getElementById('newCatInput');
+        if(input.value.trim() !== "") {
+            categories.push(input.value.trim());
+            input.value = "";
+            renderCategories();
+        }
+    }
+
+    function deleteCategory(index) {
+        if(confirm("Are you sure you want to delete this category?")) {
+            categories.splice(index, 1);
+            renderCategories();
+        }
+    }
+
+    // Modal Control Functions
+    function openModal() { document.getElementById('colModal').style.display = 'block'; }
+    function closeModal() { document.getElementById('colModal').style.display = 'none'; }
+    function openCatModal() { document.getElementById('catModal').style.display = 'block'; }
+    function closeCatModal() { document.getElementById('catModal').style.display = 'none'; }
+
+    // Close modals on outside click
+    window.onclick = function(event) {
+        if (event.target.className === 'modal') {
+            closeModal();
+            closeCatModal();
+        }
+    }
+
+    // Initialize the view
+    renderCategories();
+</script>
+
+</body>
+</html>

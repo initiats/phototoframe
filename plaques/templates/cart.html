@@ -1,0 +1,360 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Your Basket | Photoglass Luxury</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favglass.png' %}">
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --dark: #0a0a0a;
+            --gold: #b38e44;
+            --border: #eeeeee;
+            --transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            --round-radius: 20px;
+            --abstrak-purple: #5956e1;
+            --green: #00a651;
+            --danger: #ef4444;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background: #fff; color: var(--dark); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+        /* --- NAVIGATION --- */
+        header { background: #fff; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--border); }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 5%; max-width: 1600px; margin: auto; }
+        .brand-logo { height: 38px; width: auto; }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--dark);
+            order: 3;
+            padding: 5px;
+        }
+
+        nav ul { display: flex; list-style: none; gap: 30px; margin: 0; padding: 0; }
+        nav ul li { position: relative; }
+        nav a { text-decoration: none; color: var(--dark); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 20px 0; display: inline-block; transition: 0.3s; }
+        nav a:hover { color: var(--abstrak-purple); }
+
+        .dropdown {
+            position: absolute; top: 100%; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #ffffff; min-width: 220px; box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+            border-radius: 15px; padding: 15px 0; opacity: 0; visibility: hidden; transition: all 0.4s ease; z-index: 1100;
+        }
+        nav ul li:hover .dropdown { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        .dropdown a { display: block; padding: 12px 25px; color: #666; text-transform: none; font-size: 14px; font-weight: 500; transition: 0.3s; }
+        .dropdown a:hover { background: #f8f9ff; color: var(--abstrak-purple); padding-left: 30px; }
+
+        .user-actions { display: flex; gap: 15px; align-items: center; }
+        .action-icon { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #f8f8f8; color: var(--dark); text-decoration: none; transition: 0.3s; font-size: 18px; }
+        .action-icon:hover { background: var(--abstrak-purple); color: white; transform: translateY(-3px); }
+
+        /* --- BASKET MAIN CONTENT --- */
+        .basket-container { display: flex; max-width: 1400px; margin: 60px auto; padding: 0 5%; gap: 50px; }
+        .basket-main { flex: 2; }
+        .basket-title { font-family: 'Playfair Display', serif; font-size: 32px; margin-bottom: 40px; }
+        .basket-title span { font-size: 14px; font-family: 'Inter'; font-weight: 400; color: #94a3b8; margin-left: 15px; }
+
+        .cart-item { display: flex; gap: 30px; padding-bottom: 40px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+        .product-preview-img { width: 220px; height: 220px; background: #fdfdfd; border-radius: 15px; display: flex; align-items: center; justify-content: center; padding: 10px; border: 1px solid var(--border); overflow: hidden; }
+        .product-preview-img img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; }
+
+        .item-details { flex: 1; }
+        .item-details h2 { font-family: 'Playfair Display', serif; font-size: 22px; margin: 0 0 15px; }
+        .item-spec { font-size: 13px; color: #64748b; margin-bottom: 8px; line-height: 1.6; }
+        .item-spec b { color: var(--dark); }
+
+        .quantity-control { display: flex; align-items: center; gap: 12px; margin-top: 25px; }
+        .qty-input { width: 65px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; text-align: center; font-weight: 700; outline: none; }
+
+        .price-tag { font-weight: 800; margin-left: auto; font-size: 20px; color: var(--dark); }
+        .price-tag small { display: block; font-size: 11px; color: #94a3b8; font-weight: 400; text-align: right; }
+
+        .delete-link { font-size: 11px; color: var(--danger); text-decoration: none; margin-top: 20px; display: inline-block; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
+
+        /* --- SIDEBAR --- */
+        .order-sidebar { flex: 1; background: #fff; border: 1px solid var(--border); padding: 40px; border-radius: var(--round-radius); height: fit-content; position: sticky; top: 120px; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: 600; }
+        .summary-row.total { font-size: 24px; border-top: 1px solid var(--border); padding-top: 20px; margin-top: 20px; font-family: 'Playfair Display', serif; }
+
+        .btn-place-order { width: 100%; background: var(--dark); color: #fff; border: none; padding: 22px; border-radius: 15px; font-weight: 700; font-size: 14px; cursor: pointer; text-transform: uppercase; transition: 0.3s; text-decoration: none; display: block; text-align: center; }
+        .btn-place-order:hover { background: var(--abstrak-purple); transform: translateY(-3px); }
+
+        .empty-cart { text-align: center; padding: 100px 0; }
+        .btn-continue { display: inline-block; margin-top: 20px; color: var(--gold); font-weight: 800; text-decoration: none; text-transform: uppercase; font-size: 12px; border-bottom: 2px solid var(--gold); padding-bottom: 5px; }
+
+        /* --- FOOTER MAIN --- */
+        footer { background: #fff; padding: 80px 5% 40px; border-top: 1px solid var(--border); }
+        .footer-social-strip { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto 60px; padding-bottom: 30px; border-bottom: 1px solid var(--border); }
+        .footer-social-strip .social-box { display: flex; justify-content: center; flex: 1; }
+        .footer-social-strip a { color: #999; font-size: 22px; transition: 0.3s ease; text-decoration: none; }
+        .footer-social-strip a:hover { color: var(--abstrak-purple); transform: translateY(-5px); }
+
+        .footer-main-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 50px; max-width: 1400px; margin: 0 auto 60px; }
+        .footer-cta p { color: #777; font-size: 15px; line-height: 1.7; max-width: 350px; }
+        .footer-links-col h4 { font-size: 16px; font-weight: 700; margin-bottom: 25px; color: var(--dark); text-transform: uppercase; letter-spacing: 1px; }
+        .footer-links-col ul { list-style: none; padding: 0; }
+        .footer-links-col ul li { margin-bottom: 15px; }
+        .footer-links-col a { text-decoration: none; color: #999; font-size: 15px; transition: 0.3s; }
+        .footer-links-col a:hover { color: var(--abstrak-purple); padding-left: 5px; }
+
+        .footer-bottom-line { display: flex; justify-content: space-between; align-items: center; padding-top: 30px; border-top: 1px solid var(--border); max-width: 1400px; margin: 0 auto; }
+        .copyright { color: #999; font-size: 14px; }
+        .footer-legal-links { display: flex; gap: 25px; }
+        .footer-legal-links a { text-decoration: none; color: #999; font-size: 13px; transition: 0.3s; }
+        .footer-legal-links a:hover { color: var(--abstrak-purple); }
+        .back-to-top { width: 45px; height: 45px; background: var(--abstrak-purple); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; text-decoration: none; transition: 0.3s; }
+
+        /* --- MOBILE OPTIMIZATION --- */
+        @media (max-width: 992px) {
+            .mobile-toggle { display: block; }
+            nav {
+                position: fixed; top: 0; right: -100%; width: 280px; height: 100vh;
+                background: #fff; z-index: 2000; padding: 80px 30px;
+                box-shadow: -10px 0 30px rgba(0,0,0,0.1); transition: 0.4s ease;
+            }
+            nav.active { right: 0; }
+            nav ul { flex-direction: column; gap: 15px; }
+            nav a { font-size: 16px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; width: 100%; }
+            .dropdown { position: static; opacity: 1; visibility: visible; transform: none; box-shadow: none; display: none; padding-left: 15px; }
+            nav ul li:hover .dropdown { display: block; }
+
+            .basket-container { flex-direction: column; margin: 30px auto; }
+            .order-sidebar { position: static; padding: 30px 20px; }
+
+            .cart-item { flex-direction: column; gap: 20px; }
+            .product-preview-img { width: 100%; height: auto; aspect-ratio: 1/1; }
+            .price-tag { margin-left: 0; margin-top: 10px; text-align: left; }
+            .price-tag small { text-align: left; }
+
+            /* Standardized Footer Mobile */
+            footer { padding: 40px 5% 20px; text-align: center; }
+            .footer-social-strip { flex-wrap: wrap; gap: 15px; margin-bottom: 30px; }
+            .footer-social-strip .social-box { flex: 0 0 20%; }
+            .footer-main-grid { grid-template-columns: 1fr; gap: 30px; margin-bottom: 40px; }
+            .footer-cta { grid-column: span 1; }
+            .footer-cta p { margin: 0 auto; }
+            .footer-links-col h4 { margin-bottom: 15px; font-size: 14px; }
+            .footer-links-col ul li { margin-bottom: 10px; }
+            .footer-bottom-line { flex-direction: column; gap: 20px; }
+            .footer-legal-links { flex-wrap: wrap; justify-content: center; gap: 10px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="nav-container">
+        <a href="{% url 'index' %}"><img src="{% static 'images/photo2glass.jpg' %}" class="brand-logo" alt="Logo"></a>
+        <nav id="sidebarNav">
+            <ul>
+                <li><a href="{% url 'index' %}">Home</a></li>
+                <li class="has-dropdown">
+                    <a href="{% url 'categories' %}" class="dropdown-trigger">Personalization <i class="fa-solid fa-chevron-down" style="font-size: 9px; margin-left: 5px;"></i></a>
+                    <div class="dropdown">
+                        {% for cat in categories %}
+                        <a href="{% url 'categories' %}?id={{ cat.id }}">{{ cat.name }}</a>
+                        {% endfor %}
+                    </div>
+                </li>
+                <li>
+                    <a href="{% url 'collections' %}">Collections <i class="fa-solid fa-chevron-down" style="font-size: 9px; margin-left: 5px;"></i></a>
+                    <div class="dropdown">
+                        <a href="{% url 'collections' %}">All Collections</a>
+                        <a href="{% url 'collections' %}?style=landscape">Landscape</a>
+                        <a href="#">Modern & Abstract Arts</a>
+                        <a href="#">Natural and wildlife</a>
+                        <a href="#">Religious and spiritual</a>
+                    </div>
+                </li>
+                <li><a href="{% url 'accessories' %}">Accessories</a></li>
+                <li><a href="/about">About Us</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="user-actions">
+            <a href="{% url 'my_account' %}" class="action-icon"><i class="fa-regular fa-user"></i></a>
+            <a href="/cart/" class="action-icon"><i class="fa-solid fa-cart-shopping"></i></a>
+            <button class="mobile-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </div>
+</header>
+
+<div class="basket-container">
+    <main class="basket-main">
+        <h1 class="basket-title">Basket <span>/ {{ cart_items|length }} item(s)</span></h1>
+
+        {% if cart_items %}
+            {% for item in cart_items %}
+            <div class="cart-item">
+                <div class="product-preview-img">
+                    {% if item.custom_image %}
+                        <img src="{{ item.custom_image }}" alt="Bespoke Design">
+                    {% else %}
+                        <img src="{% static 'images/placeholder.jpg' %}" alt="Preview">
+                    {% endif %}
+                </div>
+                <div class="item-details">
+                    <h2>{{ item.product_name|default:"Custom Glass Plaque" }}</h2>
+
+                    <div class="item-spec"><b>Shape:</b> {{ item.shape|default:"Standard" }}</div>
+                    <div class="item-spec"><b>Size:</b> {{ item.dimension|default:"Standard" }}</div>
+                    <div class="item-spec"><b>Inscription:</b> <span style="font-style: italic; color: var(--abstrak-purple);">"{{ item.text|default:"None" }}"</span></div>
+
+                    <div class="quantity-control">
+                        <label style="font-size: 12px; font-weight: 600;">Quantity:</label>
+                        <input type="number"
+                               class="qty-input"
+                               value="{{ item.quantity|default:1 }}"
+                               min="1"
+                               onchange="updateQty('{{ item.cart_key }}', this.value)">
+
+                        <div class="price-tag">
+                            Rs.{{ item.price }}
+                            <small>per unit</small>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'remove_from_cart' item.cart_key %}" class="delete-link">
+                        <i class="fa-regular fa-trash-can"></i> Remove Item
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-cart">
+                <i class="fa-solid fa-basket-shopping" style="font-size: 48px; color: #eee; margin-bottom: 20px;"></i>
+                <p>Your basket is currently empty.</p>
+                <a href="/" class="btn-continue">Continue Shopping</a>
+            </div>
+        {% endif %}
+    </main>
+
+    {% if cart_items %}
+    <aside class="order-sidebar">
+        <h3 style="font-family: 'Playfair Display', serif; margin-bottom: 30px;">Order Summary</h3>
+        <div class="summary-row"><span>Subtotal</span><span>Rs.{{ total_price }}</span></div>
+        <div class="summary-row" style="color: var(--green);"><span>Delivery</span><span>Complimentary</span></div>
+        <div class="summary-row total"><span>Total</span><span>Rs.{{ total_price }}</span></div>
+        <a href="/checkout" class="btn-place-order">Go to Checkout</a>
+    </aside>
+    {% endif %}
+</div>
+
+<footer>
+    <div class="footer-social-strip">
+        <div class="social-box"><a href="#"><i class="fab fa-facebook-f"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-pinterest-p"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-linkedin-in"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-instagram"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-vimeo-v"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-dribbble"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-behance"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-snapchat-ghost"></i></a></div>
+    </div>
+
+    <div class="footer-main-grid">
+        <div class="footer-cta">
+            <a href="{% url 'index' %}">
+                <img src="{% static 'images/photo2glass.jpg' %}" class="brand-logo" alt="Logo" style="margin-bottom: 20px;">
+            </a>
+            <p>Subscribe to our newsletter and stay updated with our latest glass plaque collections.</p>
+        </div>
+
+        <div class="footer-links-col">
+            <h4>Quick links</h4>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-links-col">
+            <h4>Explore</h4>
+            <ul>
+                <li><a href="/categories">Personalization</a></li>
+                <li><a href="/collections">Collections</a></li>
+                <li><a href="/accessories">Accessories</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-links-col">
+            <h4>Support</h4>
+            <ul class="footer-contact-info" style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 12px;"><a href="tel:+919765435678" style="color: #999; text-decoration: none;"><i class="fas fa-phone-alt" style="color: var(--abstrak-purple); margin-right: 8px;"></i> +91 97654 35678</a></li>
+                <li><a href="mailto:photoframe@gmail.com" style="color: #999; text-decoration: none;"><i class="fas fa-envelope" style="color: var(--abstrak-purple); margin-right: 8px;"></i> photoframe@gmail.com</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom-line">
+        <div class="copyright">&copy; Copyright photo2glass. All rights reserved.</div>
+        <div class="footer-legal-links">
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms & Conditions</a>
+            <a href="/refund">Refund Policy</a>
+            <a href="/faqs">FAQs</a>
+        </div>
+        <a href="#" class="back-to-top"><i class="fas fa-chevron-up"></i></a>
+    </div>
+</footer>
+
+<script>
+    const menuBtn = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebarNav');
+
+    if(menuBtn) {
+        menuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            const icon = menuBtn.querySelector('i');
+            if (sidebar.classList.contains('active')) {
+                icon.classList.replace('fa-bars', 'fa-xmark');
+            } else {
+                icon.classList.replace('fa-xmark', 'fa-bars');
+            }
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (sidebar && !sidebar.contains(e.target) && menuBtn && !menuBtn.contains(e.target)) {
+            sidebar.classList.remove('active');
+            const icon = menuBtn.querySelector('i');
+            icon.classList.replace('fa-xmark', 'fa-bars');
+        }
+    });
+
+    function updateQty(cartKey, newQty) {
+        if (newQty < 1) return;
+        fetch("/cart/update/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ index: cartKey, quantity: newQty })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'success') window.location.reload();
+            else alert("Error updating quantity: " + (data.message || "Unknown error"));
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+</script>
+
+</body>
+</html>
