@@ -1,0 +1,350 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Order Management | Photoglass Admin</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favglass.png' %}">
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --primary: #1d3557;
+            --primary-bg: #f1f5f9;
+            --bg-body: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --card-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #fff;
+            height: 100vh;
+            position: fixed;
+            left: 0; top: 0;
+            border-right: 1px solid #eef2f6;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            z-index: 2000;
+            transition: var(--transition);
+        }
+
+        .sidebar-header { padding: 30px 25px; text-align: center; }
+        .sidebar-header img { max-width: 150px; }
+
+        .nav-menu { flex: 1; padding: 0 15px; }
+        .menu-label {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 1.5px;
+            padding: 25px 15px 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 18px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 10px;
+            margin-bottom: 4px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-item i { margin-right: 12px; width: 20px; text-align: center; }
+        .nav-item.active { background: var(--primary); color: #fff; }
+        .nav-item:hover { background: var(--primary-bg); color: var(--primary); }
+        .logout-section { padding: 20px; border-top: 1px solid #f1f5f9; }
+
+        /* --- FIXED MOBILE HEADER --- */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 70px;
+            background: #fff;
+            border-bottom: 1px solid #eef2f6;
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1500;
+        }
+
+        .menu-toggle {
+            background: none; border: none; font-size: 22px;
+            color: var(--primary); cursor: pointer;
+        }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 40px 50px;
+            transition: var(--transition);
+        }
+
+        .header-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header-box h1 { font-size: 26px; font-weight: 700; margin: 0; }
+
+        .data-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            padding: 30px;
+        }
+
+        /* --- TABLE & STATUSES --- */
+        .table-responsive { width: 100%; border-radius: 15px; }
+
+        .table thead th {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid #f1f5f9;
+            padding: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .table tbody td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .badge-Pending { background: #fff8e1; color: #b08900; }
+        .badge-Production { background: #e0f2fe; color: #0369a1; }
+        .badge-Packaging { background: #f1f5f9; color: #475569; }
+        .badge-ReadyforDispatch { background: #dcfce7; color: #15803d; }
+        .badge-Shipped { background: #ede9fe; color: #6d28d9; }
+
+        .form-select-sm {
+            border-radius: 10px;
+            border: 1px solid #eef2f6;
+            font-size: 13px;
+            padding: 8px 12px;
+            background: #f8fafc;
+            font-weight: 500;
+            min-width: 150px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(2px);
+            z-index: 1900;
+        }
+        .overlay.active { display: block; }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 992px) {
+            .sidebar { left: -100%; }
+            .sidebar.active { left: 0; }
+            .mobile-header { display: flex; }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 100px 20px 40px;
+            }
+            .header-box h1 { font-size: 22px; }
+            .data-card { padding: 15px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="overlay" id="overlay"></div>
+
+<header class="mobile-header">
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fa-solid fa-bars-staggered"></i>
+    </button>
+    <img src="{% static 'images/photo2glass.jpg' %}" alt="Logo" style="height: 30px;">
+    <div style="width: 42px;"></div>
+</header>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <img src="{% static 'images/photo2glass.jpg' %}" alt="Logo">
+    </div>
+
+    <nav class="nav-menu">
+        <p class="menu-label">Main System</p>
+        <a href="{% url 'dashboard' %}" class="nav-item">
+            <i class="fa-solid fa-chart-pie"></i> Dashboard
+        </a>
+
+        <p class="menu-label">Catalogue Management</p>
+        <a href="{% url 'banner_list' %}" class="nav-item">
+            <i class="fa-solid fa-image"></i> Banner
+        </a>
+        <a href="{% url 'category_list' %}" class="nav-item">
+            <i class="fa-solid fa-tags"></i> Categories
+        </a>
+        <a href="{% url 'collection_list' %}" class="nav-item">
+            <i class="fa-solid fa-layer-group"></i> Collections
+        </a>
+        <a href="{% url 'accessory_list' %}" class="nav-item">
+            <i class="fa-solid fa-gem"></i> Accessories
+        </a>
+        <a href="{% url 'shape_list' %}" class="nav-item">
+            <i class="fa-solid fa-shapes"></i> Add Format
+        </a>
+        <a href="{% url 'material_list' %}" class="nav-item">
+            <i class="fa-solid fa-cubes"></i> Materials
+        </a>
+        <a href="{% url 'thickness_list' %}" class="nav-item">
+            <i class="fa-solid fa-bars-staggered"></i> Thickness
+        </a>
+        <a href="{% url 'dimension_list' %}" class="nav-item">
+            <i class="fa-solid fa-ruler-combined"></i> Dimensions
+        </a>
+        <a href="{% url 'fastening_list' %}" class="nav-item">
+            <i class="fa-solid fa-screwdriver-wrench"></i> Stand
+        </a>
+        <a href="{% url 'product_list' %}" class="nav-item">
+            <i class="fa-solid fa-box"></i> Product
+        </a>
+
+        <p class="menu-label">Sales</p>
+        <a href="{% url 'order_list' %}" class="nav-item active">
+            <i class="fa-solid fa-truck-fast"></i> Orders
+        </a>
+    </nav>
+
+    <div class="logout-section">
+        <a href="{% url 'logout' %}" class="nav-item" style="color:#ef4444;">
+            <i class="fa-solid fa-power-off"></i> Logout
+        </a>
+    </div>
+</aside>
+
+<main class="main-content">
+    <div class="header-box">
+        <h1>Order Management</h1>
+    </div>
+
+    <div class="data-card">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Address</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th class="text-end">Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>
+                            <span class="fw-bold" style="color:var(--primary);">#{{ order.order_number }}</span>
+                            <br>
+                            <small class="text-muted">{{ order.created_at|date:"d M Y" }}</small>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">{{ order.full_name }}</div>
+                            <div class="small text-muted"><i class="fa fa-phone me-1"></i> {{ order.mobile }}</div>
+                        </td>
+                        <td style="max-width:220px;">
+                            <small class="text-muted">{{ order.address|truncatechars:50 }}</small>
+                        </td>
+                        <td><span class="fw-bold">₹{{ order.total_amount }}</span></td>
+                        <td>
+                            <span class="status-badge badge-{{ order.status|cut:' ' }}">
+                                {{ order.status }}
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <form action="{% url 'order_status_update' order.id %}" method="POST" class="d-inline-flex">
+                                {% csrf_token %}
+                                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                    <option value="Production" {% if order.status == 'Production' %}selected{% endif %}>Production</option>
+                                    <option value="Packaging" {% if order.status == 'Packaging' %}selected{% endif %}>Packaging</option>
+                                    <option value="Ready for Dispatch" {% if order.status == 'Ready for Dispatch' %}selected{% endif %}>Ready</option>
+                                    <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">No active orders found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+
+    function toggleMenu() {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
+    }
+
+    menuToggle.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+    window.onclick = function(event) {
+        if (event.target == overlay) toggleMenu();
+    }
+</script>
+
+</body>
+</html>

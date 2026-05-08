@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bespoke Customization | Photoglass Premium</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favglass.png' %}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { --green: #00a651; --dark: #121212; --border: #edf2f7; --gold: #b38e4d; --bg-light: #f9fbfc; --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        body { font-family: 'Inter', sans-serif; margin: 0; background-color: #fff; color: var(--dark); overflow: hidden; }
+
+        header { border-bottom: 1px solid var(--border); padding: 0 5%; display: flex; justify-content: space-between; align-items: center; background: #fff; height: 90px; position: sticky; top: 0; z-index: 100; }
+        .brand-logo { height: 48px; width: auto; }
+        nav ul { display: flex; list-style: none; gap: 40px; margin: 0; padding: 0; }
+        nav ul li a { text-decoration: none; color: var(--dark); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+
+        .customizer-wrapper { display: flex; height: calc(100vh - 90px); }
+        .controls-panel { flex: 1; padding: 40px 4%; border-right: 1px solid var(--border); overflow-y: auto; max-width: 480px; background: #fff; }
+        .product-title { font-family: 'Playfair Display', serif; font-size: 30px; line-height: 1.2; margin: 20px 0; }
+
+        /* Shape Grid */
+        .shape-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 30px; }
+        .shape-box { border: 1px solid var(--border); padding: 15px 5px; text-align: center; cursor: pointer; border-radius: 6px; transition: var(--transition); }
+        .shape-box:hover, .shape-box.active { border-color: var(--dark); background: var(--bg-light); }
+        .shape-box i { font-size: 20px; color: #cbd5e1; display: block; margin-bottom: 8px; }
+        .shape-box span { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #718096; }
+
+        textarea { width: 100%; border: 1px solid var(--border); padding: 15px; border-radius: 6px; font-family: 'Playfair Display', serif; font-size: 18px; background: var(--bg-light); outline: none; margin-bottom: 20px; }
+
+        /* Artisan Preview Panel */
+        .preview-panel { flex: 2; background: var(--bg-light); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .canvas-container { position: relative; width: 70%; max-width: 550px; aspect-ratio: 1.4/1; background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 30px 80px rgba(0,0,0,0.08); border-radius: 4px; }
+        #main-mockup { max-width: 80%; max-height: 80%; object-fit: contain; }
+        #mockup-text-overlay { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 65%; text-align: center; font-family: 'Playfair Display', serif; font-size: 2.2vw; color: #2d3748; pointer-events: none; font-weight: 700; }
+
+        .btn-submit { width: 100%; background: var(--dark); color: #fff; border: none; padding: 20px; border-radius: 6px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
+        .btn-submit:hover { background: var(--green); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="{% static 'images/photo2glass.jpg' %}" class="brand-logo">
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/shop/">Shop</a></li>
+                <li><a href="/about/">Story</a></li>
+            </ul>
+        </nav>
+        <div style="width: 100px; text-align: right;"><i class="fa-solid fa-bag-shopping"></i></div>
+    </header>
+
+    <div class="customizer-wrapper">
+        <aside class="controls-panel">
+            <h1 class="product-title">Artisan Custom Plaque</h1>
+            <h2>€77.00</h2>
+
+            <div style="font-size:10px; font-weight:800; text-transform:uppercase; margin:30px 0 15px;">1. Select Shape</div>
+            <div class="shape-selector">
+                <div class="shape-box active" onclick="updateView('Rectangle', this)"><i class="fa-regular fa-square"></i><span>Rectangle</span></div>
+                <div class="shape-box" onclick="updateView('Book', this)"><i class="fa-solid fa-book-open"></i><span>Book</span></div>
+                <div class="shape-box" onclick="updateView('Heart', this)"><i class="fa-solid fa-heart"></i><span>Heart</span></div>
+                <div class="shape-box" onclick="updateView('Star', this)"><i class="fa-solid fa-star"></i><span>Star</span></div>
+                <div class="shape-box" onclick="updateView('Cloud', this)"><i class="fa-solid fa-cloud"></i><span>Cloud</span></div>
+                <div class="shape-box" onclick="updateView('Oval', this)"><i class="fa-solid fa-circle"></i><span>Oval</span></div>
+            </div>
+
+            <div style="font-size:10px; font-weight:800; text-transform:uppercase; margin-bottom:15px;">2. Engraving Details</div>
+            <textarea id="composer-input" placeholder="Type your tribute..." oninput="liveUpdate()"></textarea>
+
+            <button class="btn-submit">Add to Basket</button>
+        </aside>
+
+        <main class="preview-panel">
+            <div class="canvas-container">
+                <img id="main-mockup" src="https://plaquedeces.fr/cdn/shop/files/plaque-funeraire-personnalisee-rectangle.png">
+                <div id="mockup-text-overlay">In Loving Memory</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // DYNAMIC DATA FROM DJANGO
+        const shapeImages = {{ shape_data_json|safe }};
+
+        function updateView(shape, el) {
+            const img = document.getElementById('main-mockup');
+
+            // Updates image based on Admin Panel uploads
+            if (shapeImages[shape]) {
+                img.src = shapeImages[shape];
+            }
+
+            document.querySelectorAll('.shape-box').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function liveUpdate() {
+            const input = document.getElementById('composer-input');
+            const preview = document.getElementById('mockup-text-overlay');
+            preview.innerText = input.value || "In Loving Memory";
+        }
+    </script>
+</body>
+</html>
