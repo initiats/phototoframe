@@ -1,0 +1,403 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Material Management | Photoglass Admin</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favglass.png' %}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --primary: #1d3557;
+            --primary-bg: #f1f5f9;
+            --bg-body: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --card-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #fff;
+            height: 100vh;
+            position: fixed;
+            left: 0; top: 0;
+            border-right: 1px solid #eef2f6;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            z-index: 2000;
+            transition: var(--transition);
+        }
+
+        .sidebar-header { padding: 30px 25px; text-align: center; }
+        .sidebar-header img { max-width: 150px; }
+
+        .nav-menu { flex: 1; padding: 0 15px; }
+        .menu-label {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 1.5px;
+            padding: 25px 15px 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 18px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 10px;
+            margin-bottom: 4px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-item i { margin-right: 12px; width: 20px; text-align: center; }
+        .nav-item.active { background: var(--primary); color: #fff; }
+        .nav-item:hover { background: var(--primary-bg); color: var(--primary); }
+        .logout-section { padding: 20px; border-top: 1px solid #f1f5f9; }
+
+        /* --- FIXED MOBILE HEADER --- */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 70px;
+            background: #fff;
+            border-bottom: 1px solid #eef2f6;
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1500;
+        }
+
+        .menu-toggle {
+            background: none; border: none; font-size: 22px;
+            color: var(--primary); cursor: pointer;
+        }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 40px 50px;
+            transition: var(--transition);
+        }
+
+        .header-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header-box h1 { font-size: 26px; font-weight: 700; margin: 0; }
+
+        .btn-add {
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        /* --- TABLE & CARDS --- */
+        .data-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            padding: 30px;
+        }
+
+        .table-responsive { width: 100%; border-radius: 15px; }
+
+        .table thead th {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid #f1f5f9;
+            padding: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .table tbody td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        .badge-active { background: #dcfce7; color: #16a34a; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .badge-inactive { background: #fee2e2; color: #ef4444; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 10px;
+            border: none;
+            background: #f8fafc;
+            color: #64748b;
+            margin-left: 10px;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover { background: var(--primary-bg); color: var(--primary); }
+        .btn-delete:hover { background: #fee2e2; color: #ef4444; }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(2px);
+            z-index: 1900;
+        }
+        .overlay.active { display: block; }
+
+        /* --- MODAL --- */
+        .modal-content { border-radius: 20px; border: none; padding: 10px; }
+        .form-control, .form-select { border-radius: 10px; padding: 12px; border: 1px solid #eef2f6; font-size: 14px; }
+        .form-control:focus, .form-select:focus { box-shadow: none; border-color: var(--primary); }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 992px) {
+            .sidebar { left: -100%; }
+            .sidebar.active { left: 0; }
+            .mobile-header { display: flex; }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 100px 20px 40px;
+            }
+            .header-box { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .btn-add { width: 100%; justify-content: center; }
+            .data-card { padding: 15px; }
+        }
+
+        @media (max-width: 600px) {
+            .header-box h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="overlay" id="overlay"></div>
+
+<header class="mobile-header">
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fa-solid fa-bars-staggered"></i>
+    </button>
+    <img src="{% static 'images/photo2glass.jpg' %}" alt="Logo" style="height: 30px;">
+    <div style="width: 42px;"></div>
+</header>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <img src="{% static 'images/photo2glass.jpg' %}" alt="Logo">
+    </div>
+
+    <nav class="nav-menu">
+        <p class="menu-label">Main System</p>
+        <a href="{% url 'dashboard' %}" class="nav-item">
+            <i class="fa-solid fa-chart-pie"></i> Dashboard
+        </a>
+
+        <p class="menu-label">Catalogue Management</p>
+        <a href="{% url 'banner_list' %}" class="nav-item">
+            <i class="fa-solid fa-image"></i> Banner
+        </a>
+        <a href="{% url 'category_list' %}" class="nav-item">
+            <i class="fa-solid fa-tags"></i> Categories
+        </a>
+        <a href="{% url 'collection_list' %}" class="nav-item">
+            <i class="fa-solid fa-layer-group"></i> Collections
+        </a>
+        <a href="{% url 'accessory_list' %}" class="nav-item">
+            <i class="fa-solid fa-gem"></i> Accessories
+        </a>
+        <a href="{% url 'shape_list' %}" class="nav-item">
+            <i class="fa-solid fa-shapes"></i> Add Format
+        </a>
+        <a href="{% url 'material_list' %}" class="nav-item active">
+            <i class="fa-solid fa-cubes"></i> Materials
+        </a>
+        <a href="{% url 'thickness_list' %}" class="nav-item">
+            <i class="fa-solid fa-bars-staggered"></i> Thickness
+        </a>
+        <a href="{% url 'dimension_list' %}" class="nav-item">
+            <i class="fa-solid fa-ruler-combined"></i> Dimensions
+        </a>
+        <a href="{% url 'fastening_list' %}" class="nav-item">
+            <i class="fa-solid fa-screwdriver-wrench"></i> Stand
+        </a>
+        <a href="{% url 'product_list' %}" class="nav-item">
+            <i class="fa-solid fa-box"></i> Product
+        </a>
+
+        <p class="menu-label">Sales</p>
+        <a href="{% url 'order_list' %}" class="nav-item">
+            <i class="fa-solid fa-truck-fast"></i> Orders
+        </a>
+    </nav>
+
+    <div class="logout-section">
+        <a href="{% url 'logout' %}" class="nav-item" style="color:#ef4444;">
+            <i class="fa-solid fa-power-off"></i> Logout
+        </a>
+    </div>
+</aside>
+
+<main class="main-content">
+    <div class="header-box">
+        <h1>Material Management</h1>
+        <button class="btn-add" data-bs-toggle="modal" data-bs-target="#materialModal" onclick="prepareAdd()">
+            <i class="fa fa-plus-circle"></i> NEW MATERIAL
+        </button>
+    </div>
+
+    <div class="data-card">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Material Name</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mat in materials %}
+                    <tr>
+                        <td class="fw-semibold">{{ mat.name }}</td>
+                        <td>
+                            {% if mat.status %}
+                            <span class="badge-active">Active</span>
+                            {% else %}
+                            <span class="badge-inactive">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end text-nowrap">
+                            <button class="action-btn" onclick="prepareEdit('{{ mat.id }}','{{ mat.name|escapejs }}',{{ mat.status|yesno:'true,false' }})">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <a href="{% url 'material_delete' mat.pk %}" class="action-btn btn-delete" onclick="return confirm('Delete material?')">
+                                <i class="fa fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-5">No materials found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div class="modal fade" id="materialModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <form action="{% url 'material_save' %}" method="POST">
+                {% csrf_token %}
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="fw-bold" id="modalLabel">Add Material</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="material_id" id="material_id">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase text-muted">Material Name</label>
+                        <input type="text" name="name" id="m_name" class="form-control shadow-none" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase text-muted">Availability Status</label>
+                        <select name="status" id="m_status" class="form-select shadow-none">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="submit" class="btn-add w-100 justify-content-center">SAVE MATERIAL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const materialModalElement = document.getElementById('materialModal');
+    const matModal = new bootstrap.Modal(materialModalElement);
+
+    // Sidebar Logic
+    function toggleMenu() {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
+    }
+
+    menuToggle.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+    // Modal Logic
+    function prepareAdd(){
+        document.getElementById('modalLabel').innerText="Add Material";
+        document.getElementById('material_id').value="";
+        document.getElementById('m_name').value="";
+        document.getElementById('m_status').value="active";
+    }
+
+    function prepareEdit(id, name, status){
+        document.getElementById('modalLabel').innerText="Edit Material";
+        document.getElementById('material_id').value=id;
+        document.getElementById('m_name').value=name;
+        document.getElementById('m_status').value=status ? "active" : "inactive";
+        matModal.show();
+    }
+
+    window.onclick = function(event) {
+        if (event.target == overlay) toggleMenu();
+    }
+</script>
+
+</body>
+</html>
