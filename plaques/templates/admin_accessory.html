@@ -1,0 +1,389 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Accessory Management | Photoglass Admin</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favglass.png' %}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --primary: #1d3557;
+            --primary-bg: #f1f5f9;
+            --bg-body: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background: var(--bg-body);
+            display: flex;
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #fff;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid #eef2f6;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            z-index: 2000;
+            transition: var(--transition);
+        }
+
+        .sidebar-header { padding: 30px 25px; text-align: center; }
+        .sidebar-header img { max-width: 150px; }
+
+        .nav-menu { flex: 1; padding: 0 15px; }
+        .menu-label {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 1.5px;
+            padding: 25px 15px 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 18px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 10px;
+            margin-bottom: 4px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-item i { margin-right: 12px; width: 20px; text-align: center; }
+        .nav-item.active { background: var(--primary); color: #fff; }
+        .nav-item:hover { background: var(--primary-bg); color: var(--primary); }
+        .logout-section { padding: 20px; border-top: 1px solid #f1f5f9; }
+
+        /* --- FIXED MOBILE HEADER --- */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 70px;
+            background: #fff;
+            border-bottom: 1px solid #eef2f6;
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1500;
+        }
+
+        .menu-toggle {
+            background: none; border: none; font-size: 22px;
+            color: var(--primary); cursor: pointer;
+        }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 40px 50px;
+            transition: var(--transition);
+        }
+
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header-flex h1 { font-size: 26px; font-weight: 700; margin: 0; }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        /* --- TABLE & CARDS --- */
+        .data-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            padding: 30px;
+        }
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th { text-align: left; padding: 15px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid #f1f5f9; letter-spacing: 0.5px; }
+        td { padding: 15px; font-size: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+        .preview-img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; border: 1px solid #eee; }
+        .price-badge { background: #f0fdf4; color: #16a34a; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 13px; }
+
+        .action-btn { color: #64748b; text-decoration: none; margin-left: 10px; transition: 0.3s; cursor: pointer; font-size: 16px; }
+        .action-btn:hover { color: var(--primary); }
+
+        /* --- MODAL --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .modal-content h3 { margin-top: 0; font-size: 20px; font-weight: 700; margin-bottom: 25px; }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 12px; border: 1px solid #eef2f6; border-radius: 10px;
+            font-family: inherit; font-size: 14px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 1900;
+        }
+        .overlay.active { display: block; }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 992px) {
+            .sidebar { left: -100%; }
+            .sidebar.active { left: 0; }
+            .mobile-header { display: flex; }
+            .main-content {
+                margin-left: 0; width: 100%; padding: 100px 20px 40px;
+            }
+            .header-flex { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .btn-primary { width: 100%; justify-content: center; }
+            .data-card { padding: 15px; }
+            .modal-content { margin: 15% auto; }
+        }
+
+        @media (max-width: 600px) {
+            .header-flex h1 { font-size: 22px; }
+            td { padding: 12px 10px; }
+            .preview-img { width: 50px; height: 50px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+
+<header class="mobile-header">
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fa-solid fa-bars-staggered"></i>
+    </button>
+    <img src="{% static 'images/photo2glass.jpg' %}" alt="Logo" style="height: 30px;">
+    <div style="width: 42px;"></div>
+</header>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <img src="{% static 'images/photo2glass.jpg' %}" alt="Logo">
+    </div>
+
+    <nav class="nav-menu">
+        <p class="menu-label">Main System</p>
+        <a href="{% url 'dashboard' %}" class="nav-item">
+            <i class="fa-solid fa-chart-pie"></i> Dashboard
+        </a>
+
+        <p class="menu-label">Catalogue Management</p>
+        <a href="{% url 'banner_list' %}" class="nav-item">
+            <i class="fa-solid fa-image"></i> Banner
+        </a>
+        <a href="{% url 'category_list' %}" class="nav-item">
+            <i class="fa-solid fa-tags"></i> Categories
+        </a>
+        <a href="{% url 'collection_list' %}" class="nav-item">
+            <i class="fa-solid fa-layer-group"></i> Collections
+        </a>
+        <a href="{% url 'accessory_list' %}" class="nav-item active">
+            <i class="fa-solid fa-gem"></i> Accessories
+        </a>
+        <a href="{% url 'shape_list' %}" class="nav-item">
+            <i class="fa-solid fa-shapes"></i> Add Format
+        </a>
+        <a href="{% url 'material_list' %}" class="nav-item">
+            <i class="fa-solid fa-cubes"></i> Materials
+        </a>
+        <a href="{% url 'thickness_list' %}" class="nav-item">
+            <i class="fa-solid fa-bars-staggered"></i> Thickness
+        </a>
+        <a href="{% url 'dimension_list' %}" class="nav-item">
+            <i class="fa-solid fa-ruler-combined"></i> Dimensions
+        </a>
+        <a href="{% url 'fastening_list' %}" class="nav-item">
+            <i class="fa-solid fa-screwdriver-wrench"></i> Stand
+        </a>
+        <a href="{% url 'product_list' %}" class="nav-item">
+            <i class="fa-solid fa-box"></i> Product
+        </a>
+
+        <p class="menu-label">Sales</p>
+        <a href="{% url 'order_list' %}" class="nav-item">
+            <i class="fa-solid fa-truck-fast"></i> Orders
+        </a>
+    </nav>
+
+    <div class="logout-section">
+        <a href="{% url 'logout' %}" class="nav-item" style="color:#ef4444;">
+            <i class="fa-solid fa-power-off"></i> Logout
+        </a>
+    </div>
+</aside>
+
+<main class="main-content">
+    <div class="header-flex">
+        <h1>Accessories</h1>
+        <button class="btn-primary" onclick="openModal()"><i class="fa-solid fa-plus"></i> NEW ACCESSORY</button>
+    </div>
+
+    <div class="data-card">
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Preview</th>
+                        <th>Title</th>
+                        <th>Price</th>
+                        <th>Description</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for acc in accessories %}
+                    <tr>
+                        <td>{% if acc.cover_image %}<img src="{{ acc.cover_image.url }}" class="preview-img">{% endif %}</td>
+                        <td><strong style="color:var(--text-main);">{{ acc.title }}</strong></td>
+                        <td><span class="price-badge">₹{{ acc.price }}</span></td>
+                        <td style="color:var(--text-muted); max-width: 200px;">{{ acc.description|truncatechars:40 }}</td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <a href="javascript:void(0);" class="action-btn" onclick="openEditModal('{{ acc.pk }}', '{{ acc.title|escapejs }}', '{{ acc.price }}', '{{ acc.description|escapejs }}')">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                            <a href="{% url 'accessory_delete' acc.pk %}" class="action-btn" style="color:#ef4444;" onclick="return confirm('Delete this accessory?')">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" style="text-align:center; padding:60px; color:#94a3b8;">No accessories found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div id="accModal" class="modal">
+    <div class="modal-content">
+        <h3>Add New Accessory</h3>
+        <form action="{% url 'accessory_add' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group"><label>TITLE</label><input type="text" name="title" required></div>
+            <div class="form-group"><label>PRICE (₹)</label><input type="number" step="0.01" name="price" required></div>
+            <div class="form-group"><label>DESCRIPTION</label><textarea name="description" rows="3"></textarea></div>
+            <div class="form-group"><label>COVER IMAGE</label><input type="file" name="cover_image" required></div>
+            <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">SAVE ACCESSORY</button>
+            <button type="button" onclick="closeModal()" style="width:100%; margin-top:12px; background:none; border:none; color:var(--text-muted); cursor:pointer; font-weight:600;">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h3>Edit Accessory</h3>
+        <form id="editForm" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group"><label>TITLE</label><input type="text" name="title" id="edit_title" required></div>
+            <div class="form-group"><label>PRICE (₹)</label><input type="number" step="0.01" name="price" id="edit_price" required></div>
+            <div class="form-group"><label>DESCRIPTION</label><textarea name="description" id="edit_description" rows="3"></textarea></div>
+            <div class="form-group"><label>CHANGE IMAGE (Optional)</label><input type="file" name="cover_image"></div>
+            <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">UPDATE ACCESSORY</button>
+            <button type="button" onclick="closeEditModal()" style="width:100%; margin-top:12px; background:none; border:none; color:var(--text-muted); cursor:pointer; font-weight:600;">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+
+    function toggleMenu() {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
+    }
+
+    menuToggle.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+    function openModal() { document.getElementById('accModal').style.display = 'block'; }
+    function closeModal() { document.getElementById('accModal').style.display = 'none'; }
+
+    function openEditModal(id, title, price, description) {
+        // Corrected URL path to match your urls.py
+        document.getElementById('editForm').action = `/accessory/edit/${id}/`;
+        document.getElementById('edit_title').value = title;
+        document.getElementById('edit_price').value = price;
+        document.getElementById('edit_description').value = description;
+        document.getElementById('editModal').style.display = 'block';
+    }
+    function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('accModal')) closeModal();
+        if (event.target == document.getElementById('editModal')) closeEditModal();
+        if (event.target == overlay) toggleMenu();
+    }
+</script>
+
+</body>
+</html>

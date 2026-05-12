@@ -1,0 +1,194 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | Photoglass Control Panel</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favglass.png' %}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #1d3557;
+            --accent: #b38e44;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --error: #ef4444;
+            --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .login-card {
+            background: var(--white);
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            border-radius: 20px;
+            text-align: center;
+            position: relative;
+            border: 1px solid #eef2f6;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .logo-wrapper { margin-bottom: 35px; }
+        .brand-logo { max-width: 200px; height: auto; }
+
+        .login-card h2 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #94a3b8;
+            margin-bottom: 40px;
+            font-weight: 800;
+        }
+
+        .form-group { text-align: left; margin-bottom: 25px; position: relative; }
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .form-group input {
+            width: 100%;
+            padding: 14px 15px 14px 45px;
+            border: 1px solid #e2e8f0;
+            font-size: 14px;
+            background: #fcfdfe;
+            transition: var(--transition);
+            border-radius: 12px;
+            color: var(--primary);
+        }
+
+        .form-group i { position: absolute; left: 18px; color: #94a3b8; font-size: 16px; }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(29, 53, 87, 0.05);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 10px;
+            border-radius: 12px;
+            font-size: 13px;
+        }
+
+        .login-btn:hover {
+            background: #457b9d;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(29, 53, 87, 0.15);
+        }
+
+        .message-container { margin-bottom: 25px; }
+        .error-msg {
+            background: #fef2f2;
+            color: var(--error);
+            padding: 12px;
+            font-size: 13px;
+            border-radius: 10px;
+            border: 1px solid #fee2e2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .footer-link {
+            margin-top: 30px;
+            display: inline-block;
+            font-size: 12px;
+            color: #64748b;
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo-wrapper">
+            <img src="{% static 'images/photo2glass.jpg' %}" alt="Logo" class="brand-logo">
+        </div>
+
+        <h2>Admin Portal</h2>
+
+        {% if messages %}
+        <div class="message-container">
+            {% for message in messages %}
+                <div class="error-msg">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form action="{% url 'adminlogin' %}" method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="username">Admin Username</label>
+                <div class="input-wrapper">
+                    <i class="fa-regular fa-user"></i>
+                    <input type="text" id="username" name="username" placeholder="Enter username" required autocomplete="off">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Security Password</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <input type="password" id="password" name="password" placeholder="Enter password" required>
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn">
+                Authorize Access
+            </button>
+        </form>
+
+        <a href="{% url 'index' %}" class="footer-link">
+            <i class="fa-solid fa-arrow-left-long"></i>
+            Return to Storefront
+        </a>
+    </div>
+
+</body>
+</html>
