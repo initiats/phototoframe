@@ -1,0 +1,432 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Photoglass | Premium Bespoke Plaques</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favglass.png' %}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --dark: #0a0a0a;
+            --gold: #b38e44;
+            --border: #eeeeee;
+            --transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            --round-radius: 20px;
+            --abstrak-purple: #5956e1;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { scroll-behavior: smooth; }
+
+        /* --- MOVING ANIMATION BACKGROUND --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background: linear-gradient(-45deg, #ffffff, #f8f9ff, #f3f4f6, #ffffff);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--dark);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- FLOATING FRAMES ANIMATION --- */
+        .animated-bg-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .floating-shape {
+            position: absolute;
+            background: rgba(89, 86, 225, 0.03);
+            border: 1px solid rgba(89, 86, 225, 0.05);
+            border-radius: 15px;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* --- NAVIGATION --- */
+        header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--border); }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 5%; max-width: 1600px; margin: auto; }
+        .brand-logo { height: 38px; width: auto; }
+
+        .mobile-toggle { display: none; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--dark); order: 3; }
+
+        nav ul { display: flex; list-style: none; gap: 30px; margin: 0; padding: 0; }
+        nav ul li { position: relative; }
+        nav a { text-decoration: none; color: var(--dark); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 20px 0; display: inline-block; transition: 0.3s; }
+        nav a:hover { color: var(--abstrak-purple); }
+
+        .dropdown { position: absolute; top: 100%; left: 50%; transform: translateX(-50%) translateY(20px); background: #ffffff; min-width: 220px; box-shadow: 0 15px 50px rgba(0,0,0,0.1); border-radius: 15px; padding: 15px 0; opacity: 0; visibility: hidden; transition: all 0.4s ease; z-index: 1100; }
+        nav ul li:hover .dropdown { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        .dropdown a { display: block; padding: 12px 25px; color: #666; text-transform: none; font-size: 14px; font-weight: 500; letter-spacing: 0; transition: 0.3s; }
+        .dropdown a:hover { background: #f8f9ff; color: var(--abstrak-purple); padding-left: 30px; }
+
+        .user-actions { display: flex; gap: 15px; align-items: center; }
+        .action-icon { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #f8f8f8; color: var(--dark); text-decoration: none; transition: 0.3s; font-size: 18px; }
+        .action-icon:hover { background: var(--abstrak-purple); color: white; transform: translateY(-3px); }
+
+        /* --- HERO --- */
+        .hero-section { width: 100%; padding: 0 20px; margin-top: 20px; }
+        .hero-viewport { position: relative; width: 100%; height: 75vh; min-height: 550px; background-color: #111; border-radius: 60px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.2); }
+        .hero-slide { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; visibility: hidden; transition: opacity 1.2s ease-in-out; z-index: 1; display: flex; align-items: center; }
+        .hero-slide.active { opacity: 1; visibility: visible; z-index: 5; }
+        .hero-bg-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transform: scale(1.1); transition: 10s linear; }
+        .hero-slide.active .hero-bg-image { transform: scale(1); }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.6) 0%, transparent 100%); z-index: 2; }
+        .hero-content { position: relative; z-index: 10; padding: 0 10%; color: white; max-width: 900px; }
+        .hero-content h1 { font-size: clamp(34px, 6vw, 65px); margin: 0 0 30px 0; font-weight: 800; line-height: 1.1; }
+        .hero-btn { display: inline-block; padding: 18px 45px; background: white; color: #254bd3; text-decoration: none; font-weight: 700; border-radius: 18px; font-size: 14px; transition: 0.3s; }
+        .hero-btn:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+
+        /* --- STEPS --- */
+        .steps { padding: 80px 5%; text-align: center; background: transparent; }
+        .steps h2 { font-family: 'Playfair Display', serif; font-size: 36px; margin-bottom: 50px; }
+        .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; max-width: 1300px; margin: 0 auto; }
+        .step-item { transition: 0.3s; padding: 20px; }
+        .step-item:hover { transform: translateY(-10px); }
+        .step-item i { font-size: 32px; color: var(--gold); margin-bottom: 20px; }
+        .step-item h4 { font-size: 14px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; }
+        .step-item p { font-size: 14px; color: #666; line-height: 1.6; }
+
+        /* --- CARDS & GRID --- */
+        .category-group { padding: 20px 5% 60px; max-width: 1600px; margin: auto; }
+        .category-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .category-header h3 { font-family: 'Playfair Display', serif; font-size: 28px; margin: 0; font-weight: 500; }
+        .view-all { color: var(--gold); text-decoration: none; font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; padding: 8px 0; }
+
+        .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; }
+        .card {
+            text-decoration: none; color: inherit; border: 1px solid var(--border);
+            padding: 25px; border-radius: var(--round-radius); text-align: center;
+            transition: var(--transition); background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px); display: flex; flex-direction: column;
+        }
+        .card:hover { transform: translateY(-15px) scale(1.02); box-shadow: 0 30px 60px rgba(0,0,0,0.1); border-color: var(--abstrak-purple); }
+        .card-img { aspect-ratio: 1/1; background: #fff; border-radius: 15px; overflow: hidden; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; }
+        .card-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.8s; }
+        .card:hover .card-img img { transform: scale(1.15); }
+        .card-title { font-family: 'Playfair Display', serif; font-size: 22px; margin: 0 0 8px 0; font-weight: 500; color: var(--dark); }
+        .card-price { display: block; font-weight: 700; font-size: 18px; color: #000; margin-bottom: 15px; }
+        .p-now { font-size: 11px; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid var(--gold); padding-bottom: 5px; color: var(--dark); display: inline-block; align-self: center; }
+
+        /* --- TRUST BAR --- */
+        .trust-bar { padding: 60px 5%; background: rgba(255,255,255,0.5); border-top: 1px solid var(--border); }
+        .trust-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 1300px; margin: auto; text-align: center; }
+        .trust-item h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px; }
+
+        /* --- FOOTER MAIN --- */
+        footer { background: #fff; padding: 80px 5% 40px; border-top: 1px solid var(--border); }
+        .footer-social-strip { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto 60px; padding-bottom: 30px; border-bottom: 1px solid var(--border); }
+        .footer-social-strip .social-box { display: flex; justify-content: center; flex: 1; }
+        .footer-social-strip a { color: #999; font-size: 22px; transition: 0.3s ease; }
+        .footer-social-strip a:hover { color: var(--abstrak-purple); transform: translateY(-5px); }
+
+        .footer-main-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 50px; max-width: 1400px; margin: 0 auto 60px; }
+        .footer-cta p { color: #777; font-size: 15px; line-height: 1.7; max-width: 350px; }
+        .footer-links-col h4 { font-size: 16px; font-weight: 700; margin-bottom: 25px; color: var(--dark); text-transform: uppercase; letter-spacing: 1px; }
+        .footer-links-col ul { list-style: none; padding: 0; }
+        .footer-links-col ul li { margin-bottom: 15px; }
+        .footer-links-col a { text-decoration: none; color: #999; font-size: 15px; transition: 0.3s; }
+        .footer-links-col a:hover { color: var(--abstrak-purple); padding-left: 5px; }
+
+        .footer-bottom-line { display: flex; justify-content: space-between; align-items: center; padding-top: 30px; border-top: 1px solid var(--border); max-width: 1400px; margin: 0 auto; }
+        .copyright { color: #999; font-size: 14px; }
+        .footer-legal-links { display: flex; gap: 25px; }
+        .footer-legal-links a { text-decoration: none; color: #999; font-size: 13px; transition: 0.3s; }
+        .footer-legal-links a:hover { color: var(--abstrak-purple); }
+        .back-to-top { width: 45px; height: 45px; background: var(--abstrak-purple); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; text-decoration: none; transition: 0.3s; }
+
+        @media (max-width: 992px) {
+            .mobile-toggle { display: block; }
+            nav { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #fff; z-index: 2000; padding: 80px 30px; transition: 0.4s; box-shadow: -10px 0 30px rgba(0,0,0,0.1); }
+            nav.active { right: 0; }
+            nav ul { flex-direction: column; gap: 10px; }
+            nav a { font-size: 16px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; width: 100%; }
+            .dropdown { position: static; opacity: 1; visibility: visible; transform: none; box-shadow: none; display: none; padding-left: 15px; }
+            nav ul li:hover .dropdown { display: block; }
+            .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .steps-grid { grid-template-columns: 1fr; }
+            .footer-main-grid { grid-template-columns: 1fr; text-align: center; }
+            .footer-bottom-line { flex-direction: column; gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="animated-bg-overlay" id="animatedBg"></div>
+
+<header>
+    <div class="nav-container">
+        <a href="{% url 'index' %}"><img src="{% static 'images/photo2glass.jpg' %}" class="brand-logo" alt="Logo"></a>
+        <nav id="sidebarNav">
+            <ul>
+                <li><a href="{% url 'index' %}">Home</a></li>
+                <li class="has-dropdown">
+                    <a href="{% url 'categories' %}" class="dropdown-trigger">Personalization <i class="fa-solid fa-chevron-down" style="font-size: 9px; margin-left: 5px;"></i></a>
+                    <div class="dropdown">
+                        {% for cat in categories %}
+                        <a href="{% url 'categories' %}?id={{ cat.id }}">{{ cat.name }}</a>
+                        {% endfor %}
+                    </div>
+                </li>
+                <li>
+                    <a href="{% url 'collections' %}">Collections <i class="fa-solid fa-chevron-down" style="font-size: 9px; margin-left: 5px;"></i></a>
+                    <div class="dropdown">
+                        <a href="{% url 'collections' %}">All Collections</a>
+                        <a href="{% url 'collections' %}?style=landscape">Landscape</a>
+                        <a href="{% url 'collections' %}?style=modern">Modern & Abstract</a>
+                        <a href="{% url 'collections' %}?style=wildlife">Wildlife</a>
+                        <a href="{% url 'collections' %}?style=religious">Religious</a>
+                    </div>
+                </li>
+                <li><a href="{% url 'accessories' %}">Accessories</a></li>
+                <li><a href="/about">About Us</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="user-actions">
+            <a href="{% url 'my_account' %}" class="action-icon"><i class="fa-regular fa-user"></i></a>
+            <a href="/cart/" class="action-icon"><i class="fa-solid fa-cart-shopping"></i></a>
+            <button class="mobile-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </div>
+</header>
+
+<main>
+    <section class="hero-section">
+        <div class="hero-viewport" id="sliderContainer">
+            {% for banner in banners %}
+            <div class="hero-slide {% if forloop.first %}active{% endif %}">
+                {% if banner.image %}
+                <img src="{{ banner.image.url }}" class="hero-bg-image" alt="Banner">
+                {% endif %}
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <h1>{{ banner.title|default:"Forever in Sight, Forever in Heart." }}</h1>
+                    <a href="/shop" class="hero-btn">Explore Collection</a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="hero-slide active">
+                <div class="hero-content"><h1>Welcome to Photoglass</h1></div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="steps">
+        <h2>3 Steps to Your Custom Plaque</h2>
+        <div class="steps-grid">
+            <div class="step-item">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <h4>1. Personalize</h4>
+                <p>Upload your favorite photo directly.</p>
+            </div>
+            <div class="step-item">
+                <i class="fa-solid fa-gem"></i>
+                <h4>2. Manual Proofing</h4>
+                <p>Artists retouch every photo for glass clarity.</p>
+            </div>
+            <div class="step-item">
+                <i class="fa-solid fa-truck-fast"></i>
+                <h4>3. Secure Delivery</h4>
+                <p>UV printed and shipped in safe packaging.</p>
+            </div>
+        </div>
+    </section>
+
+    {% for category in categories %}
+    <section class="category-group" id="category-{{ category.id }}">
+        <div class="category-header">
+            <h3>{{ category.name }}</h3>
+            <a href="{% url 'categories' %}?id={{ category.id }}" class="view-all">View All {{ category.name }}</a>
+        </div>
+        <div class="product-grid">
+            {% for product in category.product_set.all|slice:":4" %}
+            <a href="/shop?product={{ product.id }}" class="card">
+                <div class="card-img">
+                    {% if product.cover_image %}
+                    <img src="{{ product.cover_image.url }}" alt="{{ product.title }}">
+                    {% endif %}
+                </div>
+                <h3 class="card-title">{{ product.title }}</h3>
+                <span class="card-price">Rs{% if product.price %}{{ product.price }}{% else %}0.00{% endif %}</span>
+                <span class="p-now">Personalize Now</span>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endfor %}
+
+    <section class="category-group">
+        <div class="category-header">
+            <h3>Bases & Accessories</h3>
+            <a href="{% url 'accessories' %}" class="view-all">View All Accessories</a>
+        </div>
+        <div class="product-grid">
+            {% for acc in accessories|slice:":4" %}
+            <div class="card">
+                <div class="card-img">
+                    {% if acc.cover_image %}<img src="{{ acc.cover_image.url }}" alt="{{ acc.title }}">{% endif %}
+                </div>
+                <h3 class="card-title">{{ acc.title }}</h3>
+                <span class="card-price">Rs.{{ acc.price }}</span>
+                <form action="/cart/" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="product_id" value="{{ acc.id }}">
+                    <input type="hidden" name="source" value="accessory">
+                    <button type="submit" class="p-now" style="background:none; border:none; border-bottom:1px solid var(--gold); cursor:pointer;">BUY NOW</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="category-group">
+        <div class="category-header">
+            <h3>Featured Collections</h3>
+            <a href="{% url 'collections' %}" class="view-all">See All Collections</a>
+        </div>
+        <div class="product-grid">
+            {% for col in collections|slice:":4" %}
+            <a href="{% url 'collections' %}" class="card">
+                <div class="card-img">
+                    {% if col.cover_image %}
+                    <img src="{{ col.cover_image.url }}" alt="{{ col.title }}">
+                    {% endif %}
+                </div>
+                <h3 class="card-title">{{ col.title }}</h3>
+                <span class="card-price">Rs.{{ col.price }}</span>
+                <span class="p-now">View Detail</span>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+
+<section class="trust-bar">
+    <div class="trust-container">
+        <div class="trust-item"><i class="fa-solid fa-map-location-dot"></i><h5>Made in Mauritius</h5></div>
+        <div class="trust-item"><i class="fa-solid fa-truck"></i><h5>Free Delivery</h5></div>
+        <div class="trust-item"><i class="fa-solid fa-credit-card"></i><h5>Secure Pay</h5></div>
+        <div class="trust-item"><i class="fa-solid fa-award"></i><h5>Artisan Build</h5></div>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-social-strip">
+        <div class="social-box"><a href="#"><i class="fab fa-facebook-f"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-pinterest-p"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-linkedin-in"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-instagram"></i></a></div>
+        <div class="social-box"><a href="#"><i class="fab fa-snapchat-ghost"></i></a></div>
+    </div>
+
+    <div class="footer-main-grid">
+        <div class="footer-cta">
+            <a href="{% url 'index' %}">
+                <img src="{% static 'images/photo2glass.jpg' %}" class="brand-logo" alt="Logo" style="margin-bottom: 20px;">
+            </a>
+            <p>Subscribe to our newsletter and stay updated with our latest glass plaque collections.</p>
+        </div>
+        <div class="footer-links-col">
+            <h4>Quick links</h4>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </div>
+        <div class="footer-links-col">
+            <h4>Explore</h4>
+            <ul>
+                <li><a href="/categories">Personalization</a></li>
+                <li><a href="/collections">Collections</a></li>
+                <li><a href="/accessories">Accessories</a></li>
+            </ul>
+        </div>
+        <div class="footer-links-col">
+            <h4>Support</h4>
+            <ul class="footer-contact-info">
+                <li style="margin-bottom: 12px;"><a href="tel:+919765435678" style="color: #999; text-decoration: none;"><i class="fas fa-phone-alt" style="color: var(--abstrak-purple); margin-right: 8px;"></i> +91 97654 35678</a></li>
+                <li><a href="mailto:photoframe@gmail.com" style="color: #999; text-decoration: none;"><i class="fas fa-envelope" style="color: var(--abstrak-purple); margin-right: 8px;"></i> photoframe@gmail.com</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom-line">
+        <div class="copyright">&copy; Copyright photo2glass. All rights reserved.</div>
+        <div class="footer-legal-links">
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms</a>
+            <a href="/refund">Refund</a>
+            <a href="/faqs">FAQs</a>
+        </div>
+        <a href="#" class="back-to-top"><i class="fas fa-chevron-up"></i></a>
+    </div>
+</footer>
+
+<script>
+    // MOBILE MENU
+    const menuBtn = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebarNav');
+    menuBtn.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+        const icon = menuBtn.querySelector('i');
+        if (sidebar.classList.contains('active')) {
+            icon.classList.replace('fa-bars', 'fa-xmark');
+        } else {
+            icon.classList.replace('fa-xmark', 'fa-bars');
+        }
+    });
+
+    // HERO SLIDER
+    document.addEventListener("DOMContentLoaded", function() {
+        const slides = document.querySelectorAll('.hero-slide');
+        let current = 0;
+        if (slides.length > 1) {
+            setInterval(() => {
+                slides[current].classList.remove('active');
+                current = (current + 1) % slides.length;
+                slides[current].classList.add('active');
+            }, 5000);
+        }
+
+        // CREATE FLOATING BACKGROUND FRAMES
+        const bgContainer = document.getElementById('animatedBg');
+        for(let i = 0; i < 15; i++) {
+            const shape = document.createElement('div');
+            shape.className = 'floating-shape';
+            const size = Math.random() * 100 + 50;
+            shape.style.width = size + 'px';
+            shape.style.height = (size * 1.2) + 'px';
+            shape.style.left = Math.random() * 100 + '%';
+            shape.style.animationDelay = Math.random() * 20 + 's';
+            shape.style.animationDuration = (Math.random() * 10 + 15) + 's';
+            bgContainer.appendChild(shape);
+        }
+    });
+</script>
+</body>
+</html>
